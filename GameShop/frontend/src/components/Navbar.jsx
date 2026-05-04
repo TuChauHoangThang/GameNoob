@@ -1,0 +1,90 @@
+import { useState } from 'react';
+import './Navbar.css';
+
+const NAV_LINKS = [
+  { label: 'Cửa Hàng', href: '#store', active: true },
+  { label: 'Thư Viện', href: '#library' },
+  { label: 'Cộng Đồng', href: '#community' },
+];
+
+const CATEGORIES = ['Action', 'RPG', 'Strategy', 'Sports', 'Indie', 'Simulation', 'Horror', 'Adventure'];
+
+export default function Navbar({ user, onLogin, onCart }) {
+  const [searchVal, setSearchVal] = useState('');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <header className="navbar-root">
+      {/* Top bar */}
+      <div className="navbar-topbar">
+        <div className="container navbar-topbar-inner">
+          <div className="topbar-brand">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--steam-blue)">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+            </svg>
+            <span className="topbar-name">GAMENOOB</span>
+          </div>
+          <nav className="topbar-links">
+            {NAV_LINKS.map(l => (
+              <a key={l.label} href={l.href} className={`topbar-link ${l.active ? 'active' : ''}`}>{l.label}</a>
+            ))}
+          </nav>
+          <div className="topbar-user">
+            {user ? (
+              <div className="user-info">
+                <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" />
+                <span className="user-name">{user.name}</span>
+              </div>
+            ) : (
+              <div className="auth-actions">
+                <button className="btn-topbar" onClick={onLogin}>Đăng nhập</button>
+                <span className="topbar-sep">|</span>
+                <a href="#register" className="topbar-link">Đăng ký</a>
+              </div>
+            )}
+            <button className="cart-btn" onClick={onCart} title="Giỏ hàng">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59L5.25 14c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.46 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
+              </svg>
+              <span className="cart-count">0</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main nav */}
+      <nav className="navbar-main">
+        <div className="container navbar-main-inner">
+          <div className="nav-categories">
+            <div className="nav-dropdown-trigger">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+              Duyệt tìm
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+              <div className="nav-dropdown">
+                {CATEGORIES.map(c => <a key={c} href={`#${c}`} className="dropdown-item">{c}</a>)}
+              </div>
+            </div>
+            <a href="#sale" className="nav-link">Khuyến mãi</a>
+            <a href="#new" className="nav-link">Mới ra mắt</a>
+            <a href="#toplist" className="nav-link">Bán chạy</a>
+            <a href="#free" className="nav-link">Miễn phí</a>
+          </div>
+          <div className="nav-search">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Tìm trong cửa hàng"
+              value={searchVal}
+              onChange={e => setSearchVal(e.target.value)}
+            />
+            <button className="search-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </nav>
+    </header>
+  );
+}

@@ -1,0 +1,26 @@
+.game-section {
+  margin-bottom: 32px;
+  animation: fadeIn 0.5s ease;
+}
+
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), 1fr);
+  gap: 12px;
+}
+
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+@media (max-width: 1200px) {
+  .game-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 900px) {
+  .game-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .game-grid { grid-template-columns: repeat(2, 1fr); }
+}

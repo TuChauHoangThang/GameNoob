@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+require('./configs/db');
 
 const app = express();
 
@@ -14,7 +15,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/games', require('./src/routes/gameRoutes'));
+app.use('/api/games', require('./routes/gameRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Port
 const PORT = process.env.PORT || 5000;

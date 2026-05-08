@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 
 const NAV_LINKS = [
@@ -9,9 +10,29 @@ const NAV_LINKS = [
 
 const CATEGORIES = ['Action', 'RPG', 'Strategy', 'Sports', 'Indie', 'Simulation', 'Horror', 'Adventure'];
 
-export default function Navbar({ user, onLogin, onCart }) {
+export default function Navbar({ onCart }) {
   const [searchVal, setSearchVal] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        setUser(JSON.parse(userData));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/');
+  };
 
   return (
     <header className="navbar-root">
@@ -31,15 +52,17 @@ export default function Navbar({ user, onLogin, onCart }) {
           </nav>
           <div className="topbar-user">
             {user ? (
-              <div className="user-info">
-                <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" />
-                <span className="user-name">{user.name}</span>
+              <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
+                <span className="user-name" style={{ color: '#fff', fontWeight: 'bold' }}>{user.username}</span>
+                <span className="topbar-sep">|</span>
+                <button onClick={handleLogout} className="topbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa' }}>Đăng xuất</button>
               </div>
             ) : (
               <div className="auth-actions">
-                <button className="btn-topbar" onClick={onLogin}>Đăng nhập</button>
+                <Link to="/login" className="btn-topbar" style={{ textDecoration: 'none' }}>Đăng nhập</Link>
                 <span className="topbar-sep">|</span>
-                <a href="#register" className="topbar-link">Đăng ký</a>
+                <Link to="/register" className="topbar-link">Đăng ký</Link>
               </div>
             )}
             <button className="cart-btn" onClick={onCart} title="Giỏ hàng">

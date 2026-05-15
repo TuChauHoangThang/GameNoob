@@ -27,7 +27,6 @@ const Register = () => {
     setLoading(true);
     try {
       await registerApi(username, email, password);
-      alert('Đăng ký thành công! Hãy đăng nhập.');
       navigate('/login');
     } catch (err) {
       setError(err);

@@ -1,0 +1,324 @@
+/* === Cart Page === */
+.cart-page {
+  min-height: 80vh;
+  padding: 30px 0 60px;
+  background: linear-gradient(180deg, #1b2838 0%, #171a21 100%);
+}
+
+.cart-page-title {
+  font-size: 26px;
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+/* === Notice Bar === */
+.cart-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, rgba(74, 153, 211, 0.15), rgba(74, 153, 211, 0.05));
+  border: 1px solid rgba(74, 153, 211, 0.3);
+  border-radius: 4px;
+  margin-bottom: 20px;
+  color: #8dcff8;
+  font-size: 13px;
+}
+.notice-icon {
+  font-size: 16px;
+}
+
+/* === Cart Layout (2 columns) === */
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* === Game Row === */
+.cart-game-row {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+}
+.cart-game-row:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.cart-game-img-link {
+  flex-shrink: 0;
+}
+.cart-game-img {
+  width: 200px;
+  height: 94px;
+  object-fit: cover;
+  border-radius: 4px;
+  transition: opacity 0.2s;
+}
+.cart-game-img:hover {
+  opacity: 0.85;
+}
+
+.cart-game-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+.cart-game-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #c7d5e0;
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cart-game-name:hover {
+  color: #67c1f5;
+}
+.cart-game-meta {
+  font-size: 14px;
+  color: #8f98a0;
+}
+.cart-game-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 4px;
+}
+.cart-action-link {
+  font-size: 12px;
+  color: #67c1f5;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.cart-action-link:hover {
+  color: #fff;
+}
+
+.cart-game-price {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-left: 16px;
+}
+.cart-price-final {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* === Bottom Actions === */
+.cart-bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cart-continue-shopping {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: rgba(103, 193, 245, 0.1);
+  border: 1px solid rgba(103, 193, 245, 0.3);
+  border-radius: 4px;
+  color: #67c1f5;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.cart-continue-shopping:hover {
+  background: rgba(103, 193, 245, 0.2);
+  color: #fff;
+}
+.cart-remove-all {
+  font-size: 12px;
+  color: #67c1f5;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.cart-remove-all:hover {
+  color: #ff6b6b;
+}
+
+/* === Sidebar Summary === */
+.cart-summary-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 20px;
+  position: sticky;
+  top: 120px;
+}
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.cart-summary-label {
+  font-size: 13px;
+  color: #8f98a0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.cart-summary-total {
+  font-size: 22px;
+  font-weight: 600;
+  color: #beee11;
+}
+.cart-summary-note {
+  font-size: 11px;
+  color: #556772;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.cart-checkout-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4bb543, #2d8c2d);
+  color: #d2ffa5;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+}
+.cart-checkout-btn:hover {
+  background: linear-gradient(135deg, #5ec455, #39a339);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(75, 181, 67, 0.3);
+}
+
+/* === Empty State === */
+.cart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  color: #8f98a0;
+}
+.cart-empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+}
+.cart-empty-state h2 {
+  color: #c7d5e0;
+  margin-bottom: 8px;
+}
+.cart-empty-state p {
+  font-size: 14px;
+  color: #556772;
+  margin-bottom: 20px;
+}
+.cart-continue-btn, .cart-login-link {
+  display: inline-block;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #4bb543, #2d8c2d);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 4px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.cart-continue-btn:hover, .cart-login-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(75, 181, 67, 0.4);
+}
+
+/* === Recommendations === */
+.cart-recommendations {
+  margin-top: 50px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.cart-rec-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.cart-rec-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.cart-rec-card {
+  text-decoration: none;
+  border-radius: 4px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.25s ease;
+}
+.cart-rec-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  border-color: rgba(103, 193, 245, 0.3);
+}
+.cart-rec-img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+.cart-rec-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+}
+.cart-rec-platform {
+  font-size: 14px;
+}
+.cart-rec-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #beee11;
+}
+
+/* === Loading === */
+.cart-loading {
+  text-align: center;
+  padding: 60px;
+  color: #8f98a0;
+  font-size: 16px;
+}
+
+/* === Responsive === */
+@media (max-width: 900px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+  .cart-game-img {
+    width: 130px;
+    height: 60px;
+  }
+  .cart-rec-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

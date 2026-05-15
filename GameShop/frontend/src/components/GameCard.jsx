@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import './GameCard.css';
 
 function formatPrice(p) {
-  if (p === 0) return 'MIỄN PHÍ';
-  return p.toLocaleString('vi-VN') + '₫';
+  if (!p || p === 0) return 'MIỄN PHÍ';
+  const num = typeof p === 'string' ? parseInt(p) : p;
+  return new Intl.NumberFormat('vi-VN').format(num) + '₫';
 }
 
 export default function GameCard({ game, variant = 'default' }) {

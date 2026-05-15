@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useCart } from '../context/CartContext';
 import './GameDetailPage.css';
 
 export default function GameDetailPage() {
@@ -8,6 +9,8 @@ export default function GameDetailPage() {
   const [game, setGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
+  const [addedToCart, setAddedToCart] = useState(false);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -115,10 +118,21 @@ export default function GameDetailPage() {
                   <span className="final-price">Miễn phí</span>
                 ) : (
                   <>
-                    {game.price_vnd > 0 && <span className="final-price">{game.price_vnd.toLocaleString('vi-VN')}₫</span>}
+                    {game.price_vnd > 0 && <span className="final-price">{new Intl.NumberFormat('vi-VN').format(typeof game.price_vnd === 'string' ? parseInt(game.price_vnd) : game.price_vnd)}₫</span>}
                   </>
                 )}
-                <button className="btn btn-green add-to-cart">Thêm vào giỏ</button>
+                <button 
+                  className={`btn ${addedToCart ? 'btn-added' : 'btn-green'} add-to-cart`}
+                  onClick={async () => {
+                    const ok = await addToCart(game.id);
+                    if (ok) {
+                      setAddedToCart(true);
+                      setTimeout(() => setAddedToCart(false), 2000);
+                    }
+                  }}
+                >
+                  {addedToCart ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                </button>
               </div>
             </div>
 

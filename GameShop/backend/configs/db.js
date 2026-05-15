@@ -58,7 +58,76 @@ pool.connect(async (err, client, release) => {
       `;
       await client.query(createUsersTableQuery);
       await client.query(createGamesTableQuery);
-      console.log('Bảng "users" và "games" đã được kiểm tra/tạo tự động thành công.');
+      
+      const createCartsTableQuery = `
+        CREATE TABLE IF NOT EXISTS carts (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+          quantity INTEGER DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, game_id)
+        );
+      `;
+      await client.query(createCartsTableQuery);
+
+      // Bảng đơn hàng
+      const createOrdersTableQuery = `
+        CREATE TABLE IF NOT EXISTS orders (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          total_amount BIGINT NOT NULL DEFAULT 0,
+          payment_method VARCHAR(50),
+          card_last_four VARCHAR(4),
+          status VARCHAR(20) DEFAULT 'completed',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+      await client.query(createOrdersTableQuery);
+
+      // Bảng chi tiết đơn hàng
+      const createOrderItemsTableQuery = `
+        CREATE TABLE IF NOT EXISTS order_items (
+          id SERIAL PRIMARY KEY,
+          order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+          game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+          price_at_purchase BIGINT NOT NULL DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+      await client.query(createOrderItemsTableQuery);
+
+      // Bảng thư viện game người dùng
+      const createUserLibraryTableQuery = `
+        CREATE TABLE IF NOT EXISTS user_library (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          game_id INTEGER NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+          order_id INTEGER REFERENCES orders(id),
+          acquired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, game_id)
+        );
+      `;
+      await client.query(createUserLibraryTableQuery);
+
+      // Bảng thẻ thanh toán đã lưu
+      const createPaymentCardsTableQuery = `
+        CREATE TABLE IF NOT EXISTS payment_cards (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          card_type VARCHAR(30),
+          last_four VARCHAR(4) NOT NULL,
+          holder_name VARCHAR(100),
+          expiry_month INTEGER,
+          expiry_year INTEGER,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, last_four)
+        );
+      `;
+      await client.query(createPaymentCardsTableQuery);
+
+      console.log('Tất cả bảng (users, games, carts, orders, order_items, user_library, payment_cards) đã được kiểm tra/tạo tự động thành công.');
     } catch (dbErr) {
       console.error('Lỗi khi tự động tạo bảng:', dbErr);
     } finally {

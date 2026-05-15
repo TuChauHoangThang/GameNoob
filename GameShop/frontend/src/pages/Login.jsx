@@ -3,18 +3,21 @@ import { Link, useNavigate } from 'react-router-dom';
 import { loginApi } from '../api/authApi';
 import './Auth.css';
 
+import { useAuth } from '../context/AuthContext';
+
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, user } = useAuth();
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
+    if (user) {
       navigate('/');
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,10 +25,7 @@ const Login = () => {
     setLoading(true);
     try {
       const data = await loginApi(email, password);
-      // Lưu token vào localStorage
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      alert('Đăng nhập thành công!');
+      login(data.user, data.token);
       navigate('/');
     } catch (err) {
       setError(err);

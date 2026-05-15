@@ -6,7 +6,7 @@ services:
     container_name: gamenoob_db
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: 113004
       POSTGRES_DB: gamenoob
     ports:
       - "5432:5432"

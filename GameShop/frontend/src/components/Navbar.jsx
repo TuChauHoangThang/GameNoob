@@ -10,22 +10,19 @@ const NAV_LINKS = [
 
 const CATEGORIES = ['Action', 'RPG', 'Strategy', 'Sports', 'Indie', 'Simulation', 'Horror', 'Adventure'];
 
+import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+
 export default function Navbar({ onCart }) {
   const [searchVal, setSearchVal] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (e) {
-        console.error(e);
-      }
-    }
-  }, []);
+  const handleLogout = () => {
+    logout();
+  };
 
   const handleSearch = () => {
     if (searchVal.trim()) {
@@ -72,12 +69,12 @@ export default function Navbar({ onCart }) {
                 <Link to="/register" className="topbar-link">Đăng ký</Link>
               </div>
             )}
-            <button className="cart-btn" onClick={onCart} title="Giỏ hàng">
+            <Link to="/cart" className="cart-btn" title="Giỏ hàng">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59L5.25 14c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.46 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
               </svg>
-              <span className="cart-count">0</span>
-            </button>
+              {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+            </Link>
           </div>
         </div>
       </div>
@@ -90,13 +87,13 @@ export default function Navbar({ onCart }) {
               Duyệt tìm
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
               <div className="nav-dropdown">
-                {CATEGORIES.map(c => <Link key={c} to="/" onClick={() => window.location.hash = c} className="dropdown-item">{c}</Link>)}
+                {CATEGORIES.map(c => <Link key={c} to={`/?genre=${encodeURIComponent(c)}`} className="dropdown-item">{c}</Link>)}
               </div>
             </div>
-            <Link to="/" className="nav-link">Khuyến mãi</Link>
-            <Link to="/" className="nav-link">Mới ra mắt</Link>
-            <Link to="/" className="nav-link">Bán chạy</Link>
-            <Link to="/" className="nav-link">Miễn phí</Link>
+            <Link to="/?tag=sale" className="nav-link">Khuyến mãi</Link>
+            <Link to="/?tag=new" className="nav-link">Mới ra mắt</Link>
+            <Link to="/?tag=top" className="nav-link">Bán chạy</Link>
+            <Link to="/?tag=free" className="nav-link">Miễn phí</Link>
           </div>
           <div className="nav-search">
             <input

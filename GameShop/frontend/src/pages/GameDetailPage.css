@@ -223,6 +223,13 @@
 .add-to-cart {
   font-size: 14px;
   padding: 8px 15px;
+  transition: all 0.3s ease;
+}
+
+.btn-added {
+  background: linear-gradient(135deg, #2d8c2d, #1a6b1a) !important;
+  color: #fff !important;
+  pointer-events: none;
 }
 
 .sidebar-card {

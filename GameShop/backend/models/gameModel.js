@@ -105,6 +105,15 @@ const upsertGame = async (gameData) => {
   return result.rows[0];
 };
 
+// Lấy game miễn phí
+const getFreeGames = async (limit = 20, offset = 0) => {
+  const result = await pool.query(
+    'SELECT * FROM games WHERE is_free = true ORDER BY id DESC LIMIT $1 OFFSET $2',
+    [limit, offset]
+  );
+  return result.rows;
+};
+
 module.exports = {
   getAllGames,
   getGamesByGenre,
@@ -112,4 +121,5 @@ module.exports = {
   getGameById,
   getGameBySteamAppId,
   upsertGame,
+  getFreeGames,
 };

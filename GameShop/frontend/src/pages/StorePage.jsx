@@ -22,18 +22,33 @@ export default function StorePage() {
   const [activeGenre, setActiveGenre] = useState('');
   const location = useLocation();
 
+  // Đọc genre và tag từ URL
+  const params = new URLSearchParams(location.search);
+  const searchQuery = params.get('q');
+  const urlGenre = params.get('genre');
+  const urlTag = params.get('tag');
+
+  // Sync activeGenre với URL
+  useEffect(() => {
+    if (urlGenre) {
+      setActiveGenre(urlGenre);
+    } else if (!searchQuery && !urlTag) {
+      setActiveGenre('');
+    }
+  }, [urlGenre, searchQuery, urlTag]);
+
   useEffect(() => {
     const fetchGames = async () => {
       setLoading(true);
       try {
-        const params = new URLSearchParams(location.search);
-        const searchQuery = params.get('q');
-        
         let url = 'http://localhost:5000/api/games?limit=100';
         if (searchQuery) {
           url = `http://localhost:5000/api/games?q=${encodeURIComponent(searchQuery)}&limit=50`;
-        } else if (activeGenre) {
-          url = `http://localhost:5000/api/games?genre=${activeGenre}&limit=40`;
+        } else if (urlGenre || activeGenre) {
+          const genre = urlGenre || activeGenre;
+          url = `http://localhost:5000/api/games?genre=${genre}&limit=40`;
+        } else if (urlTag === 'free') {
+          url = `http://localhost:5000/api/games?free=true&limit=40`;
         }
         
         const res = await axios.get(url);
@@ -52,17 +67,29 @@ export default function StorePage() {
   const newReleases  = games.slice(0, 10);
   const topSellers   = [...games].sort((a, b) => (b.positive_ratings + b.negative_ratings) - (a.positive_ratings + a.negative_ratings)).slice(0, 15);
   const onSaleGames  = games.filter((g, i) => i % 3 === 0).slice(0, 12);
+  const freeGames    = games.filter(g => g.is_free);
 
-  const searchQuery = new URLSearchParams(location.search).get('q');
+  // Xác định tiêu đề hiển thị
+  const getActiveLabel = () => {
+    if (searchQuery) return null;
+    if (urlGenre || activeGenre) return `🎮 Thể loại: ${urlGenre || activeGenre}`;
+    if (urlTag === 'sale') return '💸 Đang Giảm Giá';
+    if (urlTag === 'new') return '🆕 Siêu Phẩm Mới (2026)';
+    if (urlTag === 'top') return '🏆 Bán Chạy Nhất';
+    if (urlTag === 'free') return '🆓 Game Miễn Phí';
+    return null;
+  };
+
+  const activeLabel = getActiveLabel();
 
   return (
     <main className="store-page page-wrapper">
-      {!searchQuery && <HeroBanner />}
+      {!searchQuery && !activeLabel && <HeroBanner />}
 
       <div className="container">
         <div className="category-bar">
           <button 
-            className={`cat-pill ${activeGenre === '' && !searchQuery ? 'active' : ''}`}
+            className={`cat-pill ${!activeGenre && !searchQuery && !urlTag ? 'active' : ''}`}
             onClick={() => { setActiveGenre(''); window.history.pushState({}, '', '/'); }}
           >
             <span className="cat-icon">🏠</span>
@@ -71,8 +98,8 @@ export default function StorePage() {
           {CATEGORIES.map(c => (
             <button 
               key={c.label} 
-              className={`cat-pill ${activeGenre === c.label ? 'active' : ''}`}
-              onClick={() => { setActiveGenre(c.label); }}
+              className={`cat-pill ${(activeGenre === c.label || urlGenre === c.label) ? 'active' : ''}`}
+              onClick={() => { setActiveGenre(c.label); window.history.pushState({}, '', `/?genre=${encodeURIComponent(c.label)}`); }}
             >
               <span className="cat-icon">{c.icon}</span>
               <span className="cat-label">{c.label}</span>
@@ -89,8 +116,8 @@ export default function StorePage() {
             <>
               {searchQuery ? (
                 <GameSection title={`🔍 Kết quả tìm kiếm cho: "${searchQuery}"`} games={games} cols={5} />
-              ) : activeGenre ? (
-                <GameSection title={`🎮 Thể loại: ${activeGenre}`} games={games} cols={5} />
+              ) : activeLabel ? (
+                <GameSection title={activeLabel} games={urlTag === 'top' ? topSellers : urlTag === 'sale' ? onSaleGames : urlTag === 'free' ? freeGames : games} cols={5} />
               ) : (
                 <>
                   <GameSection title="🆕 Siêu Phẩm Mới (2026)" games={newReleases.slice(0, 5)} cols={5} />
@@ -115,7 +142,7 @@ export default function StorePage() {
                   <div className="trending-info">
                     <span className="trending-name">{g.name}</span>
                     <span className="trending-price">
-                      {g.is_free ? 'MIỄN PHÍ' : g.price_vnd.toLocaleString('vi-VN') + '₫'}
+                      {g.is_free ? 'MIỄN PHÍ' : new Intl.NumberFormat('vi-VN').format(typeof g.price_vnd === 'string' ? parseInt(g.price_vnd) : g.price_vnd) + '₫'}
                     </span>
                   </div>
                 </div>

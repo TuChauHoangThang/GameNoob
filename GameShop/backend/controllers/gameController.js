@@ -7,12 +7,15 @@ exports.getGames = async (req, res) => {
     const offset = parseInt(req.query.offset) || 0;
     const genre = req.query.genre;
     const search = req.query.q;
+    const free = req.query.free;
     
     let games;
     if (search) {
       games = await gameModel.searchGames(search, limit, offset);
     } else if (genre) {
       games = await gameModel.getGamesByGenre(genre, limit, offset);
+    } else if (free === 'true') {
+      games = await gameModel.getFreeGames(limit, offset);
     } else {
       games = await gameModel.getAllGames(limit, offset);
     }

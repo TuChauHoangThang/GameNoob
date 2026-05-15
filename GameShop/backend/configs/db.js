@@ -14,7 +14,7 @@ pool.connect(async (err, client, release) => {
   } else {
     console.log('Connected to PostgreSQL successfully!');
     try {
-      const createTableQuery = `
+      const createUsersTableQuery = `
         CREATE TABLE IF NOT EXISTS users (
           id SERIAL PRIMARY KEY,
           username VARCHAR(50) NOT NULL,
@@ -23,8 +23,42 @@ pool.connect(async (err, client, release) => {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       `;
-      await client.query(createTableQuery);
-      console.log('Bảng "users" đã được kiểm tra/tạo tự động thành công.');
+      const createGamesTableQuery = `
+        CREATE TABLE IF NOT EXISTS games (
+          id SERIAL PRIMARY KEY,
+          steam_appid INTEGER UNIQUE,
+          name VARCHAR(500) NOT NULL,
+          short_description TEXT,
+          detailed_description TEXT,
+          header_image TEXT,
+          capsule_image TEXT,
+          website TEXT,
+          developers TEXT[],
+          publishers TEXT[],
+          price_overview JSONB,
+          price_usd FLOAT,
+          price_vnd BIGINT,
+          is_free BOOLEAN DEFAULT FALSE,
+          platforms JSONB,
+          categories JSONB,
+          genres JSONB,
+          tags JSONB,
+          screenshots JSONB,
+          movies JSONB,
+          release_date TEXT,
+          metacritic_score INTEGER,
+          background TEXT,
+          rating FLOAT DEFAULT 0,
+          owners VARCHAR(100),
+          positive_ratings INTEGER DEFAULT 0,
+          negative_ratings INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `;
+      await client.query(createUsersTableQuery);
+      await client.query(createGamesTableQuery);
+      console.log('Bảng "users" và "games" đã được kiểm tra/tạo tự động thành công.');
     } catch (dbErr) {
       console.error('Lỗi khi tự động tạo bảng:', dbErr);
     } finally {

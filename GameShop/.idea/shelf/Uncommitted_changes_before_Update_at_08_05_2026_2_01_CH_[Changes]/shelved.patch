@@ -1,0 +1,156 @@
+Index: backend/src/routes/gameRoutes.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>const express = require('express');\r\nconst router = express.Router();\r\nconst gameController = require('../controllers/gameController');\r\n\r\nrouter.get('/', gameController.getGames);\r\n\r\nmodule.exports = router;\r\n
+===================================================================
+diff --git a/backend/src/routes/gameRoutes.js b/backend/src/routes/gameRoutes.js
+--- a/backend/src/routes/gameRoutes.js	(revision 8f75242d2b3008f96da966e62c7a198517683f95)
++++ b/backend/src/routes/gameRoutes.js	(date 1778221393431)
+@@ -1,7 +1,25 @@
+-const express = require('express');
+-const router = express.Router();
++// src/routes/gameRoutes.js
++const express        = require('express');
++const router         = express.Router();
+ const gameController = require('../controllers/gameController');
+ 
++// GET /api/games/stats         → thống kê tổng quan
++router.get('/stats', gameController.getStats);
++
++// GET /api/games/featured      → top games nổi bật (theo rating)
++router.get('/featured', gameController.getFeaturedGames);
++
++// GET /api/games/search?q=xxx  → tìm kiếm theo tên
++router.get('/search', gameController.searchGames);
++
++// GET /api/games/genres        → danh sách thể loại + số lượng
++router.get('/genres', gameController.getGenres);
++
++// GET /api/games               → danh sách có filter & phân trang
++// Query: page, limit, genre, sort (popular|price_asc|price_desc|newest|rating|metacritic), free, platform
+ router.get('/', gameController.getGames);
+ 
++// GET /api/games/:id           → chi tiết 1 game theo steam_appid
++router.get('/:id', gameController.getGameById);
++
+ module.exports = router;
+Index: backend/src/controllers/gameController.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// src/controllers/gameController.js\r\nexports.getGames = (req, res) => {\r\n    res.json({ message: 'List of games will be here' });\r\n};\r\n
+===================================================================
+diff --git a/backend/src/controllers/gameController.js b/backend/src/controllers/gameController.js
+--- a/backend/src/controllers/gameController.js	(revision 8f75242d2b3008f96da966e62c7a198517683f95)
++++ b/backend/src/controllers/gameController.js	(date 1778222586548)
+@@ -1,4 +1,109 @@
+ // src/controllers/gameController.js
+-exports.getGames = (req, res) => {
+-    res.json({ message: 'List of games will be here' });
++// Tương đương @RestController trong Spring Boot
++// Chỉ xử lý req/res, gọi Service xử lý logic
++
++const gameService = require('../services/gameService');
++
++// Helper parse số an toàn
++const parseIntSafe = (val, def) => {
++    const n = parseInt(val);
++    return isNaN(n) ? def : n;
++};
++
++// ─── GET /api/games ──────────────────────────────────────────────────────────
++exports.getGames = async (req, res) => {
++    try {
++        const params = {
++            page:     parseIntSafe(req.query.page, 1),
++            limit:    Math.min(parseIntSafe(req.query.limit, 20), 100),
++            offset:   0, // Tính sau ở service hoặc param
++            genre:    req.query.genre    || null,
++            platform: req.query.platform || null,
++            sort:     req.query.sort     || 'popular',
++        };
++        params.offset = (params.page - 1) * params.limit;
++
++        if (req.query.free === 'true')  params.free = true;
++        if (req.query.free === 'false') params.free = false;
++
++        const result = await gameService.getGames(params);
++        res.json({ success: true, ...result });
++    } catch (err) {
++        console.error('getGames error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
++};
++
++// ─── GET /api/games/featured ─────────────────────────────────────────────────
++exports.getFeaturedGames = async (req, res) => {
++    try {
++        const limit = parseIntSafe(req.query.limit, 12);
++        const data  = await gameService.getFeaturedGames(limit);
++        res.json({ success: true, data });
++    } catch (err) {
++        console.error('getFeaturedGames error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
++};
++
++// ─── GET /api/games/search?q= ────────────────────────────────────────────────
++exports.searchGames = async (req, res) => {
++    try {
++        const q      = req.query.q;
++        const params = {
++            page:   parseIntSafe(req.query.page, 1),
++            limit:  Math.min(parseIntSafe(req.query.limit, 20), 100),
++            offset: 0
++        };
++        params.offset = (params.page - 1) * params.limit;
++
++        const result = await gameService.searchGames(q, params);
++        res.json({ success: true, ...result });
++    } catch (err) {
++        console.error('searchGames error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
++};
++
++// ─── GET /api/games/genres ───────────────────────────────────────────────────
++exports.getGenres = async (req, res) => {
++    try {
++        const data = await gameService.getGenres();
++        res.json({ success: true, data });
++    } catch (err) {
++        console.error('getGenres error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
++};
++
++// ─── GET /api/games/stats ────────────────────────────────────────────────────
++exports.getStats = async (req, res) => {
++    try {
++        const data = await gameService.getStats();
++        res.json({ success: true, data });
++    } catch (err) {
++        console.error('getStats error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
++};
++
++// ─── GET /api/games/:id ──────────────────────────────────────────────────────
++exports.getGameById = async (req, res) => {
++    try {
++        const appid = parseInt(req.params.id);
++        if (isNaN(appid)) {
++            return res.status(400).json({ success: false, message: 'AppID không hợp lệ' });
++        }
++
++        const result = await gameService.getGameById(appid);
++        
++        if (!result) {
++            return res.status(404).json({ success: false, message: 'Không tìm thấy game' });
++        }
++
++        res.json({ success: true, ...result });
++    } catch (err) {
++        console.error('getGameById error:', err.message);
++        res.status(500).json({ success: false, message: 'Lỗi server', error: err.message });
++    }
+ };

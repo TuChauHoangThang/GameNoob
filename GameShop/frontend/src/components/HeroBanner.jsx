@@ -1,49 +1,53 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './HeroBanner.css';
 
-const SLIDES = [
-  {
-    id: 1,
-    title: 'CyberPunk 2099',
-    subtitle: 'Trải nghiệm thế giới tương lai đen tối trong tựa game nhập vai hành động mãn nhãn nhất năm',
-    image: '/hero_banner.png',
-    tags: ['Action', 'RPG', 'Open World'],
-    price: 599000,
-    originalPrice: 999000,
-    discount: 40,
-    badge: 'MỚI RA MẮT',
-  },
-  {
-    id: 2,
-    title: "Dragon's Lair Online",
-    subtitle: 'Cuộc phiêu lưu kỳ ảo đỉnh cao — Chinh phục rồng cổ đại và giải cứu vương quốc',
-    image: '/game_dragon.png',
-    tags: ['RPG', 'Fantasy', 'Multiplayer'],
-    price: 299000,
-    originalPrice: 499000,
-    discount: 40,
-    badge: 'GIẢM GIÁ',
-  },
-  {
-    id: 3,
-    title: 'Stellar Conquest',
-    subtitle: 'Chiến lược vũ trụ — Xây dựng đế chế, chinh phục các hành tinh và tiêu diệt kẻ thù',
-    image: '/game_space.png',
-    tags: ['Strategy', 'Sci-Fi', 'Multiplayer'],
-    price: 199000,
-    originalPrice: null,
-    discount: 0,
-    badge: 'KHUYẾN NGHỊ',
-  },
-];
-
 function formatPrice(p) {
+  if (p === 0) return 'MIỄN PHÍ';
   return p.toLocaleString('vi-VN') + '₫';
 }
 
 export default function HeroBanner() {
+  const [slides, setSlides] = useState([]);
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroGames = async () => {
+      try {
+        // Fetch specific modern AAA games for the hero banner
+        const res = await axios.get('http://localhost:5000/api/games?limit=50');
+        if (res.data.success && res.data.data.length > 0) {
+          const allGames = res.data.data;
+          
+          // Find specific favorites
+          const re9 = allGames.find(g => g.name.includes('Resident Evil 9')) || allGames[0];
+          const pragmata = allGames.find(g => g.name.includes('Pragmata')) || allGames[1];
+          const third = allGames.find(g => !g.name.includes('Resident Evil 9') && !g.name.includes('Pragmata')) || allGames[2];
+
+          const games = [re9, pragmata, third].map((g, idx) => ({
+            id: g.id,
+            title: g.name,
+            subtitle: g.short_description,
+            image: g.background || g.header_image,
+            tags: typeof g.genres === 'string' ? JSON.parse(g.genres).slice(0, 3) : g.genres.slice(0, 3),
+            price: g.price_vnd,
+            originalPrice: Math.round(g.price_vnd / 0.8),
+            discount: 20,
+            badge: idx === 0 ? 'TÂM ĐIỂM 2026' : (idx === 1 ? 'SIÊU PHẨM MỚI' : 'TRENDING')
+          }));
+          setSlides(games);
+        }
+      } catch (err) {
+        console.error('Error fetching hero games:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHeroGames();
+  }, []);
 
   const goTo = useCallback((idx) => {
     if (isAnimating) return;
@@ -54,20 +58,29 @@ export default function HeroBanner() {
     }, 300);
   }, [isAnimating]);
 
-  const next = useCallback(() => goTo((current + 1) % SLIDES.length), [current, goTo]);
-  const prev = useCallback(() => goTo((current - 1 + SLIDES.length) % SLIDES.length), [current, goTo]);
+  const next = useCallback(() => {
+    if (slides.length === 0) return;
+    goTo((current + 1) % slides.length);
+  }, [current, goTo, slides.length]);
+
+  const prev = useCallback(() => {
+    if (slides.length === 0) return;
+    goTo((current - 1 + slides.length) % slides.length);
+  }, [current, goTo, slides.length]);
 
   useEffect(() => {
+    if (slides.length === 0) return;
     const t = setInterval(next, 6000);
     return () => clearInterval(t);
-  }, [next]);
+  }, [next, slides.length]);
 
-  const slide = SLIDES[current];
+  if (loading || slides.length === 0) return <div className="hero-loading"></div>;
+
+  const slide = slides[current];
 
   return (
     <section className="hero-section">
       <div className="hero-slides">
-        {/* Main slide */}
         <div className={`hero-slide ${isAnimating ? 'fade-out' : 'fade-in-slide'}`}>
           <div className="hero-bg" style={{ backgroundImage: `url(${slide.image})` }} />
           <div className="hero-overlay" />
@@ -81,7 +94,7 @@ export default function HeroBanner() {
               </div>
               <div className="hero-actions">
                 <div className="hero-price-block">
-                  {slide.discount > 0 && (
+                  {slide.discount > 0 && slide.price > 0 && (
                     <>
                       <span className="discount-badge">-{slide.discount}%</span>
                       <span className="price-original">{formatPrice(slide.originalPrice)}</span>
@@ -89,20 +102,14 @@ export default function HeroBanner() {
                   )}
                   <span className="price-final">{formatPrice(slide.price)}</span>
                 </div>
-                <button className="btn btn-green hero-buy-btn">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM17 18c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM1 2h2l3.6 7.59L5.25 14A2 2 0 007 17h12v-2H7.42c-.14 0-.25-.11-.25-.25L7.2 14h9.45c.75 0 1.41-.41 1.75-1.03l3.24-5.88A1 1 0 0020.76 5H5.21L4.27 3H1V2z"/>
-                  </svg>
-                  Thêm vào giỏ
-                </button>
-                <button className="btn btn-secondary">Xem chi tiết</button>
+                <button className="btn btn-green hero-buy-btn">Thêm vào giỏ</button>
+                <Link to={`/game/${slide.id}`} className="btn btn-secondary">Xem chi tiết</Link>
               </div>
             </div>
           </div>
 
-          {/* Thumbnail strip */}
           <div className="hero-thumbs">
-            {SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <button
                 key={s.id}
                 className={`hero-thumb ${i === current ? 'active' : ''}`}
@@ -115,13 +122,11 @@ export default function HeroBanner() {
           </div>
         </div>
 
-        {/* Arrows */}
         <button className="hero-arrow left" onClick={prev}>&#8249;</button>
         <button className="hero-arrow right" onClick={next}>&#8250;</button>
 
-        {/* Dots */}
         <div className="hero-dots">
-          {SLIDES.map((_, i) => (
+          {slides.map((_, i) => (
             <button key={i} className={`hero-dot ${i === current ? 'active' : ''}`} onClick={() => goTo(i)} />
           ))}
         </div>
@@ -129,3 +134,4 @@ export default function HeroBanner() {
     </section>
   );
 }
+

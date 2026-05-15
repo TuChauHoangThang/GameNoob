@@ -27,27 +27,34 @@ export default function Navbar({ onCart }) {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/');
+  const handleSearch = () => {
+    if (searchVal.trim()) {
+      navigate(`/?q=${encodeURIComponent(searchVal.trim())}`);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   return (
     <header className="navbar-root">
-      {/* Top bar */}
+      {/* Top bar omitted for brevity */}
       <div className="navbar-topbar">
         <div className="container navbar-topbar-inner">
-          <div className="topbar-brand">
+          <Link to="/" className="topbar-brand" style={{ textDecoration: 'none' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--steam-blue)">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
             </svg>
             <span className="topbar-name">GAMENOOB</span>
-          </div>
+          </Link>
           <nav className="topbar-links">
             {NAV_LINKS.map(l => (
-              <a key={l.label} href={l.href} className={`topbar-link ${l.active ? 'active' : ''}`}>{l.label}</a>
+              <Link key={l.label} to="/" className={`topbar-link ${l.active ? 'active' : ''}`}>{l.label}</Link>
             ))}
           </nav>
           <div className="topbar-user">
@@ -75,7 +82,6 @@ export default function Navbar({ onCart }) {
         </div>
       </div>
 
-      {/* Main nav */}
       <nav className="navbar-main">
         <div className="container navbar-main-inner">
           <div className="nav-categories">
@@ -84,13 +90,13 @@ export default function Navbar({ onCart }) {
               Duyệt tìm
               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
               <div className="nav-dropdown">
-                {CATEGORIES.map(c => <a key={c} href={`#${c}`} className="dropdown-item">{c}</a>)}
+                {CATEGORIES.map(c => <Link key={c} to="/" onClick={() => window.location.hash = c} className="dropdown-item">{c}</Link>)}
               </div>
             </div>
-            <a href="#sale" className="nav-link">Khuyến mãi</a>
-            <a href="#new" className="nav-link">Mới ra mắt</a>
-            <a href="#toplist" className="nav-link">Bán chạy</a>
-            <a href="#free" className="nav-link">Miễn phí</a>
+            <Link to="/" className="nav-link">Khuyến mãi</Link>
+            <Link to="/" className="nav-link">Mới ra mắt</Link>
+            <Link to="/" className="nav-link">Bán chạy</Link>
+            <Link to="/" className="nav-link">Miễn phí</Link>
           </div>
           <div className="nav-search">
             <input
@@ -99,8 +105,9 @@ export default function Navbar({ onCart }) {
               placeholder="Tìm trong cửa hàng"
               value={searchVal}
               onChange={e => setSearchVal(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
-            <button className="search-btn">
+            <button className="search-btn" onClick={handleSearch}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
               </svg>

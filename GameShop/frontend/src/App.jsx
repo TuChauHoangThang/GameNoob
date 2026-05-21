@@ -8,6 +8,7 @@ import Register from './pages/Register';
 import CartDrawer from './components/CartDrawer';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
+import WishlistPage from './pages/WishlistPage';
 import './App.css';
 
 import { useState } from 'react';
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
           </Routes>
           <Footer />
           <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

@@ -23,6 +23,10 @@
   justify-content: space-between;
   height: 100%;
   gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .topbar-brand {
@@ -165,6 +169,10 @@
   justify-content: space-between;
   height: 100%;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 24px;
+  box-sizing: border-box;
 }
 
 .nav-categories {

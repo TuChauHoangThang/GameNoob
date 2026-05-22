@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getWishlist, removeFromWishlist } from '../api/wishlistApi';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -135,12 +136,14 @@ export default function WishlistPage() {
 
               return (
                 <div key={game.wishlist_id || game.id} className="wishlist-item">
-                  <div className="wishlist-img-wrapper">
+                  <Link to={`/game/${game.id}`} className="wishlist-img-wrapper">
                     <img src={game.header_image || 'https://via.placeholder.com/260x120'} alt={game.name} />
-                  </div>
+                  </Link>
                   
                   <div className="wishlist-info">
-                    <h2 className="wishlist-title">{game.name}</h2>
+                    <Link to={`/game/${game.id}`} className="wishlist-title-link">
+                      <h2 className="wishlist-title">{game.name}</h2>
+                    </Link>
                     <div className="wishlist-tags">
                       {tags.map((tag, idx) => (
                         <span key={idx} className="tag-badge">{tag}</span>

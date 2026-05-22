@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useWishlist } from '../context/WishlistContext';
 import './GameCard.css';
 
 function formatPrice(p) {
@@ -13,6 +14,9 @@ export default function GameCard({ game, variant = 'default' }) {
     genres = [], rating, positive_ratings, negative_ratings,
   } = game;
 
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const inWishlist = isInWishlist(id);
+
   const parsedGenres = typeof genres === 'string' ? JSON.parse(genres) : genres;
   const image = header_image;
   const title = name;
@@ -22,6 +26,12 @@ export default function GameCard({ game, variant = 'default' }) {
   const hasDiscount = price > 0 && id % 3 === 0;
   const discount = hasDiscount ? 25 : 0;
   const originalPrice = hasDiscount ? Math.round(price / 0.75) : price;
+
+  const handleWishlist = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleWishlist(id);
+  };
 
   if (variant === 'list') {
     return (
@@ -67,8 +77,12 @@ export default function GameCard({ game, variant = 'default' }) {
         <div className="gc-img-wrapper">
           <img src={image} alt={title} loading="lazy" className="gc-img" />
           <div className="gc-overlay">
-            <button className="gc-wishlist" title="Thêm vào danh sách" onClick={(e) => { e.preventDefault(); /* wish logic */ }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <button
+              className={`gc-wishlist${inWishlist ? ' gc-wishlist--active' : ''}`}
+              title={inWishlist ? 'Xóa khỏi danh sách ước' : 'Thêm vào danh sách ước'}
+              onClick={handleWishlist}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill={inWishlist ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={inWishlist ? 0 : 2}>
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
             </button>

@@ -208,11 +208,17 @@
 
 .price-box {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #000;
+  padding: 12px 15px;
+  border-radius: 4px;
+}
+
+.price-box-top {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #000;
-  padding: 8px 15px;
-  border-radius: 4px;
 }
 
 .final-price {
@@ -230,6 +236,53 @@
   background: linear-gradient(135deg, #2d8c2d, #1a6b1a) !important;
   color: #fff !important;
   pointer-events: none;
+}
+
+/* Wishlist button in detail page */
+.btn-wishlist-detail {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 15px;
+  background: transparent;
+  border: 1px solid rgba(102,192,244,0.35);
+  color: #66c0f4;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.03em;
+}
+.btn-wishlist-detail:hover {
+  background: rgba(102,192,244,0.12);
+  border-color: #66c0f4;
+  color: #fff;
+}
+.btn-wishlist-detail--active {
+  background: rgba(201,68,85,0.15);
+  border-color: #c94455;
+  color: #e05565;
+}
+.btn-wishlist-detail--active:hover {
+  background: rgba(201,68,85,0.25);
+  border-color: #e05565;
+  color: #fff;
+}
+
+/* Toast notification */
+.wishlist-toast {
+  text-align: center;
+  font-size: 12px;
+  color: #a0d8a0;
+  padding: 4px 0 2px;
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .sidebar-card {

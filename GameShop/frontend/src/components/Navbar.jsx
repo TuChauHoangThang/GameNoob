@@ -60,6 +60,8 @@ export default function Navbar({ onCart }) {
                 <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
                 <span className="user-name" style={{ color: '#fff', fontWeight: 'bold' }}>{user.username}</span>
                 <span className="topbar-sep">|</span>
+                <Link to="/wishlist" className="topbar-link" style={{ textDecoration: 'none', color: '#c6d4df' }}>Danh sách ước</Link>
+                <span className="topbar-sep">|</span>
                 <button onClick={handleLogout} className="topbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa' }}>Đăng xuất</button>
               </div>
             ) : (

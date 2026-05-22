@@ -22,6 +22,13 @@ pool.connect(async (err, client, release) => {
           password VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+        CREATE TABLE IF NOT EXISTS wishlists (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+          game_id INTEGER REFERENCES games(id) ON DELETE CASCADE,
+          added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(user_id, game_id)
+        );
       `;
       const createGamesTableQuery = `
         CREATE TABLE IF NOT EXISTS games (

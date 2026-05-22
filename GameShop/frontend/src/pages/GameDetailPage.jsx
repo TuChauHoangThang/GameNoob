@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import './GameDetailPage.css';
 
 export default function GameDetailPage() {
@@ -10,7 +11,9 @@ export default function GameDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
+  const [wishlistMsg, setWishlistMsg] = useState('');
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -114,25 +117,48 @@ export default function GameDetailPage() {
                 {platforms.linux && <i className="fab fa-linux"></i>}
               </div>
               <div className="price-box">
-                {game.is_free ? (
-                  <span className="final-price">Miễn phí</span>
-                ) : (
-                  <>
-                    {game.price_vnd > 0 && <span className="final-price">{new Intl.NumberFormat('vi-VN').format(typeof game.price_vnd === 'string' ? parseInt(game.price_vnd) : game.price_vnd)}₫</span>}
-                  </>
-                )}
-                <button 
-                  className={`btn ${addedToCart ? 'btn-added' : 'btn-green'} add-to-cart`}
+                <div className="price-box-top">
+                  {game.is_free ? (
+                    <span className="final-price">Miễn phí</span>
+                  ) : (
+                    <>
+                      {game.price_vnd > 0 && <span className="final-price">{new Intl.NumberFormat('vi-VN').format(typeof game.price_vnd === 'string' ? parseInt(game.price_vnd) : game.price_vnd)}₫</span>}
+                    </>
+                  )}
+                  <button 
+                    className={`btn ${addedToCart ? 'btn-added' : 'btn-green'} add-to-cart`}
+                    onClick={async () => {
+                      const ok = await addToCart(game.id);
+                      if (ok) {
+                        setAddedToCart(true);
+                        setTimeout(() => setAddedToCart(false), 2000);
+                      }
+                    }}
+                  >
+                    {addedToCart ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                  </button>
+                </div>
+                <button
+                  className={`btn btn-wishlist-detail${isInWishlist(game.id) ? ' btn-wishlist-detail--active' : ''}`}
                   onClick={async () => {
-                    const ok = await addToCart(game.id);
-                    if (ok) {
-                      setAddedToCart(true);
-                      setTimeout(() => setAddedToCart(false), 2000);
+                    const result = await toggleWishlist(game.id);
+                    if (result === 'added') {
+                      setWishlistMsg('✓ Đã thêm vào danh sách ước!');
+                    } else if (result === 'removed') {
+                      setWishlistMsg('Đã xóa khỏi danh sách ước');
                     }
+                    setTimeout(() => setWishlistMsg(''), 2500);
                   }}
                 >
-                  {addedToCart ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                  <svg width="14" height="14" viewBox="0 0 24 24"
+                    fill={isInWishlist(game.id) ? 'currentColor' : 'none'}
+                    stroke="currentColor" strokeWidth={isInWishlist(game.id) ? 0 : 2}
+                  >
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  {isInWishlist(game.id) ? 'Trong danh sách ước' : 'Thêm vào danh sách ước'}
                 </button>
+                {wishlistMsg && <div className="wishlist-toast">{wishlistMsg}</div>}
               </div>
             </div>
 

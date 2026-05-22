@@ -19,6 +19,7 @@ app.use('/api/games', require('./routes/gameRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/checkout', require('./routes/checkoutRoutes'));
+app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 
 // Port
 const PORT = process.env.PORT || 5000;

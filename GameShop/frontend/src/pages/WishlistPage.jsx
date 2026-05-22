@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getWishlist, removeFromWishlist } from '../api/wishlistApi';
+import { useWishlist } from '../context/WishlistContext';
+import { useCart } from '../context/CartContext';
 import './WishlistPage.css';
 
 export default function WishlistPage() {
@@ -7,6 +9,17 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState('date_added');
+  const [addedMap, setAddedMap] = useState({});
+  const { toggleWishlist, fetchWishlist: refreshContext } = useWishlist();
+  const { addToCart } = useCart();
+
+  const handleAddToCart = async (gameId) => {
+    const ok = await addToCart(gameId);
+    if (ok) {
+      setAddedMap(prev => ({ ...prev, [gameId]: true }));
+      setTimeout(() => setAddedMap(prev => ({ ...prev, [gameId]: false })), 2000);
+    }
+  };
 
   useEffect(() => {
     fetchWishlist();
@@ -29,10 +42,14 @@ export default function WishlistPage() {
 
   const handleRemove = async (gameId) => {
     try {
-      await removeFromWishlist(gameId);
-      setWishlist(wishlist.filter(item => item.id !== gameId));
+      // Cập nhật UI local ngay lập tức
+      setWishlist(prev => prev.filter(item => item.id !== gameId));
+      // Đồng bộ với context (cập nhật nút tim trên GameCard)
+      await toggleWishlist(gameId);
     } catch (error) {
       console.error('Lỗi khi xóa khỏi wishlist:', error);
+      // Reload lại nếu lỗi
+      fetchWishlist();
     }
   };
 
@@ -151,7 +168,13 @@ export default function WishlistPage() {
                         {game.price_vnd && <span className="current-price">{price}</span>}
                         {!game.price_vnd && game.is_free && <span className="current-price text-free">MIỄN PHÍ</span>}
                       </div>
-                      <button className="btn btn-green add-to-cart-btn">Thêm vào giỏ</button>
+                      <button
+                        className={`btn ${addedMap[game.id] ? 'btn-cart-added' : 'btn-green'} add-to-cart-btn`}
+                        onClick={() => handleAddToCart(game.id)}
+                        disabled={addedMap[game.id]}
+                      >
+                        {addedMap[game.id] ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                      </button>
                     </div>
                   </div>
                 </div>

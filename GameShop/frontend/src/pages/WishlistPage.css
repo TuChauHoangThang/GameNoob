@@ -182,4 +182,26 @@
   font-size: 14px;
   border-radius: 2px;
   white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.btn-cart-added {
+  background: linear-gradient(135deg, #2d8c2d, #1a6b1a) !important;
+  color: #fff !important;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.empty-wishlist {
+  color: #8f98a0;
+  text-align: center;
+  padding: 60px 0;
+  font-size: 16px;
+}
+
+.loading-text {
+  color: #8f98a0;
+  text-align: center;
+  padding: 60px 0;
+  font-size: 16px;
 }

@@ -56,6 +56,8 @@
   transition: all var(--transition-fast);
 }
 .gc-wishlist:hover { background: #c94455; border-color: #c94455; color: #fff; }
+.gc-wishlist--active { background: #c94455; border-color: #c94455; color: #fff; }
+.gc-wishlist--active:hover { background: #a03040; border-color: #a03040; }
 
 .gc-badge {
   position: absolute;

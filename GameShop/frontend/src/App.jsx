@@ -14,28 +14,31 @@ import './App.css';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
 
   return (
     <AuthProvider>
-      <CartProvider>
-        <div className="app-root">
-          <Navbar onCart={() => setCartOpen(true)} />
-          <Routes>
-            <Route path="/" element={<StorePage />} />
-            <Route path="/game/:id" element={<GameDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-          </Routes>
-          <Footer />
-          <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-        </div>
-      </CartProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <div className="app-root">
+            <Navbar onCart={() => setCartOpen(true)} />
+            <Routes>
+              <Route path="/" element={<StorePage />} />
+              <Route path="/game/:id" element={<GameDetailPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+            </Routes>
+            <Footer />
+            <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+          </div>
+        </CartProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

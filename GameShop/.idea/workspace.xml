@@ -4,20 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6a2111e9-293c-4cac-a9c7-7e9be2515bcf" name="Changes" comment="Chức năng thêm vào giỏ hàng và thanh toán , chỉnh sửa thêm các trang game theo danh mục">
-      <change afterPath="$PROJECT_DIR$/backend/check_db.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/controllers/wishlistController.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/middleware/authMiddleware.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/models/wishlistModel.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/backend/routes/wishlistRoutes.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/api/wishlistApi.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.jsx" afterDir="false" />
+    <list default="true" id="6a2111e9-293c-4cac-a9c7-7e9be2515bcf" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/configs/db.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/configs/db.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Navbar.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/GameCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/GameCard.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/GameCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/GameCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,20 +46,20 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "HoangThang",
-    "junie.onboarding.icon.badge.shown": "true",
-    "kotlin-language-version-configured": "true",
-    "onboarding.tips.debug.path": "D:/GameNoob/GameShop/src/Main.java",
-    "to.speed.mode.migration.done": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;HoangThang&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;D:/GameNoob/GameShop/src/Main.java&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration default="true" type="JetRunConfigurationType">
       <module name="GameShop" />
@@ -110,7 +104,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778837716197</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Chức năng thêm game vào danh sách ước">
+      <option name="closed" value="true" />
+      <created>1779348847076</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1779348847076</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="UnknownFeatures">
@@ -119,7 +121,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Thêm dữ liệu game" />
     <MESSAGE value="Chức năng thêm vào giỏ hàng và thanh toán , chỉnh sửa thêm các trang game theo danh mục" />
-    <option name="LAST_COMMIT_MESSAGE" value="Chức năng thêm vào giỏ hàng và thanh toán , chỉnh sửa thêm các trang game theo danh mục" />
+    <MESSAGE value="Chức năng thêm game vào danh sách ước" />
+    <option name="LAST_COMMIT_MESSAGE" value="Chức năng thêm game vào danh sách ước" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -134,6 +134,15 @@ pool.connect(async (err, client, release) => {
       `;
       await client.query(createPaymentCardsTableQuery);
 
+      // Tự động kiểm tra/thêm các cột cho chức năng thư viện người dùng
+      await client.query(`
+        ALTER TABLE user_library ADD COLUMN IF NOT EXISTS play_time FLOAT DEFAULT 0;
+        ALTER TABLE user_library ADD COLUMN IF NOT EXISTS last_played TIMESTAMP;
+        ALTER TABLE user_library ADD COLUMN IF NOT EXISTS install_status VARCHAR(20) DEFAULT 'not_installed';
+        ALTER TABLE user_library ADD COLUMN IF NOT EXISTS is_favorite BOOLEAN DEFAULT FALSE;
+      `);
+      console.log('Các cột tính năng Thư viện (play_time, last_played, install_status, is_favorite) đã được kiểm tra/di chuyển thành công.');
+
       console.log('Tất cả bảng (users, games, carts, orders, order_items, user_library, payment_cards) đã được kiểm tra/tạo tự động thành công.');
     } catch (dbErr) {
       console.error('Lỗi khi tự động tạo bảng:', dbErr);

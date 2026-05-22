@@ -277,6 +277,52 @@ function simulatePayment(cardNumber, amount) {
   return true;
 }
 
+// Cập nhật trạng thái cài đặt
+const updateInstallStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const gameId = parseInt(req.params.gameId);
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ success: false, message: 'Trạng thái cài đặt là bắt buộc.' });
+    }
+
+    const updated = await libraryModel.updateInstallStatus(userId, gameId, status);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Trò chơi không tìm thấy trong thư viện của bạn.' });
+    }
+
+    res.json({ success: true, message: 'Cập nhật trạng thái cài đặt thành công.', data: updated });
+  } catch (error) {
+    console.error('Lỗi cập nhật cài đặt:', error);
+    res.status(500).json({ success: false, message: 'Lỗi server khi cập nhật trạng thái cài đặt.' });
+  }
+};
+
+// Cập nhật trạng thái yêu thích
+const updateFavoriteStatus = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const gameId = parseInt(req.params.gameId);
+    const { isFavorite } = req.body;
+
+    if (isFavorite === undefined) {
+      return res.status(400).json({ success: false, message: 'Trạng thái yêu thích là bắt buộc.' });
+    }
+
+    const updated = await libraryModel.updateFavoriteStatus(userId, gameId, isFavorite);
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Trò chơi không tìm thấy trong thư viện của bạn.' });
+    }
+
+    res.json({ success: true, message: 'Cập nhật trạng thái yêu thích thành công.', data: updated });
+  } catch (error) {
+    console.error('Lỗi cập nhật yêu thích:', error);
+    res.status(500).json({ success: false, message: 'Lỗi server khi cập nhật trạng thái yêu thích.' });
+  }
+};
+
 module.exports = {
   processCheckout,
   checkoutWithSavedCard,
@@ -285,4 +331,6 @@ module.exports = {
   getOrderHistory,
   getLibrary,
   checkOwnership,
+  updateInstallStatus,
+  updateFavoriteStatus,
 };

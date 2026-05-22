@@ -20,6 +20,13 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/checkout', require('./routes/checkoutRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
+app.use('/api/ratings', require('./routes/ratingRoutes'));
+
+// Khởi tạo bảng ratings khi server start
+const ratingModel = require('./models/ratingModel');
+ratingModel.initRatingsTable()
+  .then(() => console.log('Bảng user_ratings đã sẵn sàng'))
+  .catch(err => console.error('Lỗi khởi tạo bảng ratings:', err));
 
 // Port
 const PORT = process.env.PORT || 5000;

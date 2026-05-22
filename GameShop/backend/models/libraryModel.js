@@ -16,6 +16,7 @@ const addToLibrary = async (userId, gameId, orderId) => {
 const getLibraryByUserId = async (userId) => {
   const result = await pool.query(
     `SELECT ul.id, ul.acquired_at, ul.order_id,
+            ul.play_time, ul.last_played, ul.install_status, ul.is_favorite,
             g.id as game_id, g.name, g.header_image, g.short_description,
             g.genres, g.developers, g.release_date, g.price_vnd, g.is_free
      FROM user_library ul
@@ -46,9 +47,35 @@ const getOwnedGameIds = async (userId, gameIds) => {
   return result.rows.map(r => r.game_id);
 };
 
+// Cập nhật trạng thái cài đặt game
+const updateInstallStatus = async (userId, gameId, installStatus) => {
+  const result = await pool.query(
+    `UPDATE user_library
+     SET install_status = $3
+     WHERE user_id = $1 AND game_id = $2
+     RETURNING *`,
+    [userId, gameId, installStatus]
+  );
+  return result.rows[0];
+};
+
+// Cập nhật trạng thái yêu thích game
+const updateFavoriteStatus = async (userId, gameId, isFavorite) => {
+  const result = await pool.query(
+    `UPDATE user_library
+     SET is_favorite = $3
+     WHERE user_id = $1 AND game_id = $2
+     RETURNING *`,
+    [userId, gameId, isFavorite]
+  );
+  return result.rows[0];
+};
+
 module.exports = {
   addToLibrary,
   getLibraryByUserId,
   isGameOwned,
   getOwnedGameIds,
+  updateInstallStatus,
+  updateFavoriteStatus,
 };

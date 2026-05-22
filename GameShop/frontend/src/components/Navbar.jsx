@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
 
 const NAV_LINKS = [
-  { label: 'Cửa Hàng', href: '#store', active: true },
-  { label: 'Thư Viện', href: '#library' },
-  { label: 'Cộng Đồng', href: '#community' },
+  { label: 'Cửa Hàng', to: '/' },
+  { label: 'Thư Viện', to: '/library' },
+  { label: 'Cộng Đồng', to: '/community' },
 ];
 
 const CATEGORIES = ['Action', 'RPG', 'Strategy', 'Sports', 'Indie', 'Simulation', 'Horror', 'Adventure'];
@@ -19,6 +19,12 @@ export default function Navbar({ onCart }) {
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
 
   const handleLogout = () => {
     logout();
@@ -51,7 +57,7 @@ export default function Navbar({ onCart }) {
           </Link>
           <nav className="topbar-links">
             {NAV_LINKS.map(l => (
-              <Link key={l.label} to="/" className={`topbar-link ${l.active ? 'active' : ''}`}>{l.label}</Link>
+              <Link key={l.label} to={l.to} className={`topbar-link ${isActive(l.to) ? 'active' : ''}`}>{l.label}</Link>
             ))}
           </nav>
           <div className="topbar-user">

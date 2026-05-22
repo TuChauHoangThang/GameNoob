@@ -11,5 +11,7 @@ router.delete('/cards/:id', authenticate, checkoutController.deleteSavedCard);
 router.get('/orders', authenticate, checkoutController.getOrderHistory);
 router.get('/library', authenticate, checkoutController.getLibrary);
 router.post('/check-ownership', authenticate, checkoutController.checkOwnership);
+router.patch('/library/:gameId/install', authenticate, checkoutController.updateInstallStatus);
+router.patch('/library/:gameId/favorite', authenticate, checkoutController.updateFavoriteStatus);
 
 module.exports = router;

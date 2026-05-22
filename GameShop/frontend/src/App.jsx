@@ -9,6 +9,7 @@ import CartDrawer from './components/CartDrawer';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import WishlistPage from './pages/WishlistPage';
+import LibraryPage from './pages/LibraryPage';
 import './App.css';
 
 import { useState } from 'react';
@@ -30,9 +31,10 @@ export default function App() {
               <Route path="/game/:id" element={<GameDetailPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/login" element={<Login />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/library" element={<LibraryPage />} />
             </Routes>
             <Footer />
             <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

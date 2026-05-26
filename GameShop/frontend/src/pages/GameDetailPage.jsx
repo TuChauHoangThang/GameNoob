@@ -13,7 +13,7 @@ export default function GameDetailPage() {
   const [activeImage, setActiveImage] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlistMsg, setWishlistMsg] = useState('');
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
   const { user } = useAuth();
 
@@ -353,16 +353,17 @@ export default function GameDetailPage() {
                     </>
                   )}
                   <button 
-                    className={`btn ${addedToCart ? 'btn-added' : 'btn-green'} add-to-cart`}
+                    className={`btn ${cartItems.some(i => i.game_id === game.id) ? 'btn-added' : addedToCart ? 'btn-added' : 'btn-green'} add-to-cart`}
                     onClick={async () => {
                       const ok = await addToCart(game.id);
-                      if (ok) {
+                      if (ok === true) {
                         setAddedToCart(true);
                         setTimeout(() => setAddedToCart(false), 2000);
                       }
                     }}
+                    disabled={cartItems.some(i => i.game_id === game.id)}
                   >
-                    {addedToCart ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                    {cartItems.some(i => i.game_id === game.id) ? '✓ Đã có trong giỏ' : addedToCart ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
                   </button>
                 </div>
                 <button

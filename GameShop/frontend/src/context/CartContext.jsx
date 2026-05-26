@@ -46,6 +46,9 @@ export const CartProvider = ({ children }) => {
       alert('Bạn cần đăng nhập để thêm vào giỏ hàng!');
       return false;
     }
+    // Kiểm tra đã có trong giỏ chưa (client-side check)
+    const alreadyIn = cartItems.some(item => item.game_id === gameId);
+    if (alreadyIn) return 'already';
     try {
       const res = await axios.post(`${API_URL}/add`, { gameId }, { headers: getAuthHeader() });
       if (res.data.success) {
@@ -54,6 +57,7 @@ export const CartProvider = ({ children }) => {
         return true;
       }
     } catch (err) {
+      if (err.response?.status === 409) return 'already';
       console.error('Lỗi thêm giỏ hàng:', err);
     }
     return false;

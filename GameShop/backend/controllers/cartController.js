@@ -36,6 +36,9 @@ const addToCart = async (req, res) => {
       return res.status(400).json({ message: 'Thiếu gameId.' });
     }
     const item = await cartModel.addToCart(req.user.id, gameId);
+    if (item && item.alreadyInCart) {
+      return res.status(409).json({ success: false, message: 'Game này đã có trong giỏ hàng.' });
+    }
     const count = await cartModel.getCartCount(req.user.id);
     res.json({ success: true, data: item, count, message: 'Đã thêm vào giỏ hàng!' });
   } catch (error) {

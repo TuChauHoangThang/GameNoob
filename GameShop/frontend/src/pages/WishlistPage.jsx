@@ -12,7 +12,7 @@ export default function WishlistPage() {
   const [sortOrder, setSortOrder] = useState('date_added');
   const [addedMap, setAddedMap] = useState({});
   const { toggleWishlist, fetchWishlist: refreshContext } = useWishlist();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
 
   const handleAddToCart = async (gameId) => {
     const ok = await addToCart(gameId);
@@ -172,11 +172,11 @@ export default function WishlistPage() {
                         {!game.price_vnd && game.is_free && <span className="current-price text-free">MIỄN PHÍ</span>}
                       </div>
                       <button
-                        className={`btn ${addedMap[game.id] ? 'btn-cart-added' : 'btn-green'} add-to-cart-btn`}
+                        className={`btn ${cartItems.some(i => i.game_id === game.id) ? 'btn-cart-added' : addedMap[game.id] ? 'btn-cart-added' : 'btn-green'} add-to-cart-btn`}
                         onClick={() => handleAddToCart(game.id)}
-                        disabled={addedMap[game.id]}
+                        disabled={cartItems.some(i => i.game_id === game.id) || addedMap[game.id]}
                       >
-                        {addedMap[game.id] ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                        {cartItems.some(i => i.game_id === game.id) ? '✓ Đã có trong giỏ' : addedMap[game.id] ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
                       </button>
                     </div>
                   </div>

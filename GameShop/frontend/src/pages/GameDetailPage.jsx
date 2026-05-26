@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
 import './GameDetailPage.css';
 
@@ -154,6 +155,8 @@ export default function GameDetailPage() {
 
             <div className="detail-info-card">
               <div dangerouslySetInnerHTML={{ __html: game.detailed_description }} className="game-description" />
+              {/* === Phần đánh giá người dùng === */}
+              <ReviewSection gameId={id} />
             </div>
 
             {/* ===== RATING SECTION ===== */}

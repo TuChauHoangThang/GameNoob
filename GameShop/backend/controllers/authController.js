@@ -50,7 +50,8 @@ const login = async (req, res) => {
       user: {
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        is_admin: user.is_admin
       }
     };
 
@@ -131,7 +132,7 @@ const getMe = async (req, res) => {
   try {
     // req.userId được set bởi authMiddleware
     const result = await pool.query(
-      'SELECT id, username, email, created_at FROM users WHERE id = $1',
+      'SELECT id, username, email, is_admin, created_at FROM users WHERE id = $1',
       [req.userId]
     );
     const user = result.rows[0];

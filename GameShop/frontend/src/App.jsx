@@ -13,6 +13,8 @@ import CommunityPage from './pages/CommunityPage';
 import LibraryPage from './pages/LibraryPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
@@ -41,6 +43,9 @@ export default function App() {
               <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
               <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+              {/* Admin routes */}
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             </Routes>
             <Footer />
             <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

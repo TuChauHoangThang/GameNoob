@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const cartController = require('../controllers/cartController');
-const { authenticate } = cartController;
+const authMiddleware = require('../middleware/authMiddleware');
 
 // Tất cả route đều yêu cầu đăng nhập
-router.get('/', authenticate, cartController.getCart);
-router.post('/add', authenticate, cartController.addToCart);
-router.put('/:id', authenticate, cartController.updateQuantity);
-router.delete('/:id', authenticate, cartController.removeFromCart);
-router.delete('/', authenticate, cartController.clearCart);
+router.get('/', authMiddleware, cartController.getCart);
+router.post('/add', authMiddleware, cartController.addToCart);
+router.put('/:id', authMiddleware, cartController.updateQuantity);
+router.delete('/:id', authMiddleware, cartController.removeFromCart);
+router.delete('/', authMiddleware, cartController.clearCart);
 
 module.exports = router;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { loginApi } from '../api/authApi';
 import './Auth.css';
 
@@ -11,13 +11,16 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, user } = useAuth();
+  // Trang mà user muốn vào trước khi bị redirect về login
+  const from = location.state?.from?.pathname || '/';
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate(from, { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +29,7 @@ const Login = () => {
     try {
       const data = await loginApi(email, password);
       login(data.user, data.token);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       setError(err);
     } finally {

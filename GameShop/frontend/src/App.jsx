@@ -9,6 +9,7 @@ import CartDrawer from './components/CartDrawer';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import WishlistPage from './pages/WishlistPage';
+import CommunityPage from './pages/CommunityPage';
 import LibraryPage from './pages/LibraryPage';
 import './App.css';
 
@@ -34,6 +35,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/community" element={<CommunityPage />} />
               <Route path="/library" element={<LibraryPage />} />
             </Routes>
             <Footer />

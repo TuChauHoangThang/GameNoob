@@ -14,12 +14,19 @@ const getCartByUserId = async (userId) => {
   return result.rows;
 };
 
-// Thêm game vào giỏ hàng
+// Thêm game vào giỏ hàng - mỗi game chỉ 1 lần
 const addToCart = async (userId, gameId) => {
+  // Kiểm tra đã có trong giỏ chưa
+  const existing = await pool.query(
+    'SELECT id FROM carts WHERE user_id = $1 AND game_id = $2',
+    [userId, gameId]
+  );
+  if (existing.rows.length > 0) {
+    return { alreadyInCart: true };
+  }
   const result = await pool.query(
     `INSERT INTO carts (user_id, game_id, quantity)
      VALUES ($1, $2, 1)
-     ON CONFLICT (user_id, game_id) DO UPDATE SET quantity = carts.quantity + 1
      RETURNING *`,
     [userId, gameId]
   );
@@ -52,10 +59,10 @@ const clearCart = async (userId) => {
   await pool.query('DELETE FROM carts WHERE user_id = $1', [userId]);
 };
 
-// Đếm số lượng trong giỏ
+// Đếm số lượng item trong giỏ (mỗi game = 1 item)
 const getCartCount = async (userId) => {
   const result = await pool.query(
-    'SELECT COALESCE(SUM(quantity), 0) as count FROM carts WHERE user_id = $1',
+    'SELECT COUNT(*) as count FROM carts WHERE user_id = $1',
     [userId]
   );
   return parseInt(result.rows[0].count);

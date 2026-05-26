@@ -10,6 +10,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import WishlistPage from './pages/WishlistPage';
 import LibraryPage from './pages/LibraryPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 import { useState } from 'react';
@@ -27,14 +28,17 @@ export default function App() {
           <div className="app-root">
             <Navbar onCart={() => setCartOpen(true)} />
             <Routes>
+              {/* Public routes */}
               <Route path="/" element={<StorePage />} />
               <Route path="/game/:id" element={<GameDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/library" element={<LibraryPage />} />
+
+              {/* Protected routes — yêu cầu đăng nhập */}
+              <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+              <Route path="/library" element={<ProtectedRoute><LibraryPage /></ProtectedRoute>} />
             </Routes>
             <Footer />
             <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

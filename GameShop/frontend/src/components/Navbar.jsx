@@ -64,7 +64,9 @@ export default function Navbar({ onCart }) {
             {user ? (
               <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-                <span className="user-name" style={{ color: '#fff', fontWeight: 'bold' }}>{user.username}</span>
+                <Link to="/profile" className="user-name" style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }}>{user.username}</Link>
+                <span className="topbar-sep">|</span>
+                <Link to="/profile" className="topbar-link" style={{ textDecoration: 'none', color: '#c6d4df' }}>Hồ sơ</Link>
                 <span className="topbar-sep">|</span>
                 <Link to="/wishlist" className="topbar-link" style={{ textDecoration: 'none', color: '#c6d4df' }}>Danh sách ước</Link>
                 <span className="topbar-sep">|</span>

@@ -21,6 +21,7 @@ app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/checkout', require('./routes/checkoutRoutes'));
 app.use('/api/wishlist', require('./routes/wishlistRoutes'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Port
 const PORT = process.env.PORT || 5000;

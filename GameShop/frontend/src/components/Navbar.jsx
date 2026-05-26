@@ -48,7 +48,7 @@ export default function Navbar({ onCart }) {
     <header className="navbar-root">
       {/* Top bar omitted for brevity */}
       <div className="navbar-topbar">
-        <div className="container navbar-topbar-inner">
+        <div className="navbar-topbar-inner">
           <Link to="/" className="topbar-brand" style={{ textDecoration: 'none' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--steam-blue)">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
@@ -90,7 +90,7 @@ export default function Navbar({ onCart }) {
       </div>
 
       <nav className="navbar-main">
-        <div className="container navbar-main-inner">
+        <div className="navbar-main-inner">
           <div className="nav-categories">
             <div className="nav-dropdown-trigger">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>

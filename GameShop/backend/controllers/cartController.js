@@ -1,5 +1,4 @@
 const cartModel = require('../models/cartModel');
-// Lưu ý: xác thực được xử lý bởi authMiddleware, không cần import jwt ở đây
 
 // Lấy giỏ hàng
 const getCart = async (req, res) => {
@@ -20,7 +19,13 @@ const addToCart = async (req, res) => {
     if (!gameId) {
       return res.status(400).json({ message: 'Thiếu gameId.' });
     }
+
     const item = await cartModel.addToCart(req.userId, gameId);
+
+    if (item && item.alreadyInCart) {
+      return res.status(409).json({ success: false, message: 'Game này đã có trong giỏ hàng.' });
+    }
+
     const count = await cartModel.getCartCount(req.userId);
     res.json({ success: true, data: item, count, message: 'Đã thêm vào giỏ hàng!' });
   } catch (error) {

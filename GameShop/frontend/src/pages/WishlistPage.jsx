@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getWishlist, removeFromWishlist } from '../api/wishlistApi';
 import { useWishlist } from '../context/WishlistContext';
 import { useCart } from '../context/CartContext';
@@ -11,7 +12,7 @@ export default function WishlistPage() {
   const [sortOrder, setSortOrder] = useState('date_added');
   const [addedMap, setAddedMap] = useState({});
   const { toggleWishlist, fetchWishlist: refreshContext } = useWishlist();
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
 
   const handleAddToCart = async (gameId) => {
     const ok = await addToCart(gameId);
@@ -135,12 +136,14 @@ export default function WishlistPage() {
 
               return (
                 <div key={game.wishlist_id || game.id} className="wishlist-item">
-                  <div className="wishlist-img-wrapper">
+                  <Link to={`/game/${game.id}`} className="wishlist-img-wrapper">
                     <img src={game.header_image || 'https://via.placeholder.com/260x120'} alt={game.name} />
-                  </div>
+                  </Link>
                   
                   <div className="wishlist-info">
-                    <h2 className="wishlist-title">{game.name}</h2>
+                    <Link to={`/game/${game.id}`} className="wishlist-title-link">
+                      <h2 className="wishlist-title">{game.name}</h2>
+                    </Link>
                     <div className="wishlist-tags">
                       {tags.map((tag, idx) => (
                         <span key={idx} className="tag-badge">{tag}</span>
@@ -169,11 +172,11 @@ export default function WishlistPage() {
                         {!game.price_vnd && game.is_free && <span className="current-price text-free">MIỄN PHÍ</span>}
                       </div>
                       <button
-                        className={`btn ${addedMap[game.id] ? 'btn-cart-added' : 'btn-green'} add-to-cart-btn`}
+                        className={`btn ${cartItems.some(i => i.game_id === game.id) ? 'btn-cart-added' : addedMap[game.id] ? 'btn-cart-added' : 'btn-green'} add-to-cart-btn`}
                         onClick={() => handleAddToCart(game.id)}
-                        disabled={addedMap[game.id]}
+                        disabled={cartItems.some(i => i.game_id === game.id) || addedMap[game.id]}
                       >
-                        {addedMap[game.id] ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
+                        {cartItems.some(i => i.game_id === game.id) ? '✓ Đã có trong giỏ' : addedMap[game.id] ? '✓ Đã thêm!' : 'Thêm vào giỏ'}
                       </button>
                     </div>
                   </div>

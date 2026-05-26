@@ -85,7 +85,7 @@ export default function HeroBanner() {
         <div className={`hero-slide ${isAnimating ? 'fade-out' : 'fade-in-slide'}`}>
           <div className="hero-bg" style={{ backgroundImage: `url(${slide.image})` }} />
           <div className="hero-overlay" />
-          <div className="hero-content container">
+          <div className="hero-content">
             <div className="hero-info">
               {slide.badge && <span className="hero-badge">{slide.badge}</span>}
               <h1 className="hero-title">{slide.title}</h1>

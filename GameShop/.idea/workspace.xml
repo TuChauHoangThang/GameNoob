@@ -4,12 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6a2111e9-293c-4cac-a9c7-7e9be2515bcf" name="Changes" comment="">
+    <list default="true" id="6a2111e9-293c-4cac-a9c7-7e9be2515bcf" name="Changes" comment="chức năng bình luận , rating">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/.env" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/controllers/cartController.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/controllers/cartController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/models/cartModel.js" beforeDir="false" afterPath="$PROJECT_DIR$/backend/models/cartModel.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/node_modules/.package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/node_modules/.package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/GameCard.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/GameCard.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/GameCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/GameCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/context/CartContext.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/context/CartContext.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/GameDetailPage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/WishlistPage.jsx" afterDir="false" />
     </list>
@@ -112,17 +117,46 @@
       <option name="project" value="LOCAL" />
       <updated>1779348847076</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Sửa lỗi không thêm game vào danh sách ước được , sửa lỗi không thêm vào giỏ hàng được từ danh sách ước">
+      <option name="closed" value="true" />
+      <created>1779427584203</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1779427584206</updated>
+    </task>
+    <task id="LOCAL-00005" summary="chức năng bình luận , rating">
+      <option name="closed" value="true" />
+      <created>1779443133796</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1779443133796</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="UnknownFeatures">
     <option featureType="com.intellij.fileTypeFactory" implementationName=".env" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Thêm dữ liệu game" />
     <MESSAGE value="Chức năng thêm vào giỏ hàng và thanh toán , chỉnh sửa thêm các trang game theo danh mục" />
     <MESSAGE value="Chức năng thêm game vào danh sách ước" />
-    <option name="LAST_COMMIT_MESSAGE" value="Chức năng thêm game vào danh sách ước" />
+    <MESSAGE value="Sửa lỗi không thêm game vào danh sách ước được , sửa lỗi không thêm vào giỏ hàng được từ danh sách ước" />
+    <MESSAGE value="chức năng bình luận , rating" />
+    <option name="LAST_COMMIT_MESSAGE" value="chức năng bình luận , rating" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

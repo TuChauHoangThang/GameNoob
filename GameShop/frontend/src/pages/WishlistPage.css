@@ -2,7 +2,8 @@
   background-color: #1b2838;
   color: #c6d4df;
   min-height: 100vh;
-  padding: 40px 0;
+  padding-top: 20px;
+  padding-bottom: 60px;
   font-family: 'Motiva Sans', 'Arial', sans-serif;
 }
 
@@ -79,12 +80,25 @@
   height: 136px;
   flex-shrink: 0;
   margin-right: 15px;
+  display: block;
+  overflow: hidden;
 }
 .wishlist-img-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   box-shadow: 0 0 5px rgba(0,0,0,0.5);
+  transition: transform 0.2s ease;
+}
+.wishlist-img-wrapper:hover img {
+  transform: scale(1.03);
+}
+
+.wishlist-title-link {
+  text-decoration: none;
+}
+.wishlist-title-link:hover .wishlist-title {
+  color: #66c0f4;
 }
 
 .wishlist-info {

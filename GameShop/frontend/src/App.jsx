@@ -9,13 +9,13 @@ import CartDrawer from './components/CartDrawer';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import WishlistPage from './pages/WishlistPage';
+import CommunityPage from './pages/CommunityPage';
 import LibraryPage from './pages/LibraryPage';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
-
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
@@ -23,7 +23,6 @@ import { WishlistProvider } from './context/WishlistContext';
 
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
-
   return (
     <AuthProvider>
       <WishlistProvider>
@@ -36,6 +35,7 @@ export default function App() {
               <Route path="/game/:id" element={<GameDetailPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/community" element={<CommunityPage />} />
 
               {/* Protected routes — yêu cầu đăng nhập */}
               <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />

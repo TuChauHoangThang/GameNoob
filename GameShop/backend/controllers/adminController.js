@@ -1,8 +1,13 @@
 const pool = require('../configs/db');
 const gameModel = require('../models/gameModel');
 
-// ─── Middleware kiểm tra role admin ───
-// (Trong đồ án dùng cờ is_admin trong bảng users)
+/**
+ * Middleware xác minh quyền quản trị viên (Admin role).
+ * Kiểm tra cột is_admin của tài khoản đang đăng nhập trong database.
+ * @param {object} req - Express request object (userId được gán từ authMiddleware)
+ * @param {object} res - Express response object
+ * @param {function} next - Express next function
+ */
 const requireAdmin = async (req, res, next) => {
   try {
     const result = await pool.query('SELECT is_admin FROM users WHERE id = $1', [req.userId]);
@@ -16,7 +21,13 @@ const requireAdmin = async (req, res, next) => {
   }
 };
 
-// ─── Thống kê tổng quan ───
+/**
+ * Lấy các số liệu thống kê tổng quan cho trang Dashboard của quản trị viên.
+ * Bao gồm: Tổng số user, game, đơn hàng, tổng doanh thu, top 5 bán chạy, và thống kê 7 ngày gần nhất.
+ * @route GET /api/admin/stats
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 const getDashboardStats = async (req, res) => {
   try {
     const [users, games, orders, revenue] = await Promise.all([
@@ -80,7 +91,12 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-// ─── Lấy danh sách tất cả user ───
+/**
+ * Lấy danh sách tất cả người dùng trong hệ thống (Hỗ trợ phân trang và tìm kiếm theo tên/email).
+ * @route GET /api/admin/users
+ * @param {object} req - Express request object (query: limit, offset, q)
+ * @param {object} res - Express response object
+ */
 const getAllUsers = async (req, res) => {
   try {
     const limit  = parseInt(req.query.limit) || 20;
@@ -104,9 +120,12 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-// ─── CRUD Game ───
-
-// Lấy toàn bộ game (không giới hạn, dành cho admin)
+/**
+ * Lấy danh sách tất cả các game cho mục quản lý của admin (Hỗ trợ phân trang và tìm kiếm).
+ * @route GET /api/admin/games
+ * @param {object} req - Express request object (query: limit, offset, q)
+ * @param {object} res - Express response object
+ */
 const getAllGamesAdmin = async (req, res) => {
   try {
     const limit  = parseInt(req.query.limit) || 30;
@@ -130,7 +149,12 @@ const getAllGamesAdmin = async (req, res) => {
   }
 };
 
-// Cập nhật giá game
+/**
+ * Cập nhật giá bán và trạng thái miễn phí của game.
+ * @route PUT /api/admin/games/:id
+ * @param {object} req - Express request object (params: id, body: price_vnd, is_free)
+ * @param {object} res - Express response object
+ */
 const updateGamePrice = async (req, res) => {
   try {
     const { id } = req.params;
@@ -150,7 +174,12 @@ const updateGamePrice = async (req, res) => {
   }
 };
 
-// Xóa game
+/**
+ * Xóa game khỏi cơ sở dữ liệu dựa trên game ID.
+ * @route DELETE /api/admin/games/:id
+ * @param {object} req - Express request object (params: id)
+ * @param {object} res - Express response object
+ */
 const deleteGame = async (req, res) => {
   try {
     const { id } = req.params;

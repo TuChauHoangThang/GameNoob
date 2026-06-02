@@ -1,6 +1,11 @@
 const gameModel = require('../models/gameModel');
 
-// Lấy danh sách game (có phân trang)
+/**
+ * Lấy danh sách sản phẩm game (hỗ trợ phân trang, tìm kiếm theo tên, lọc theo thể loại hoặc lọc game miễn phí).
+ * @route GET /api/games
+ * @param {object} req - Express request object (query parameters: limit, offset, genre, q, free)
+ * @param {object} res - Express response object
+ */
 exports.getGames = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
@@ -29,7 +34,12 @@ exports.getGames = async (req, res) => {
   }
 };
 
-// Lấy chi tiết game theo ID
+/**
+ * Lấy thông tin chi tiết của một game cụ thể dựa theo ID.
+ * @route GET /api/games/:id
+ * @param {object} req - Express request object (params: id)
+ * @param {object} res - Express response object
+ */
 exports.getGameById = async (req, res) => {
   try {
     const game = await gameModel.getGameById(req.params.id);
@@ -44,4 +54,3 @@ exports.getGameById = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
-

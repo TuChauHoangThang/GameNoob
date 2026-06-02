@@ -1,6 +1,11 @@
 const reviewModel = require('../models/reviewModel');
 
-// Lấy tất cả review + stats của game
+/**
+ * Lấy tất cả đánh giá (reviews) và thống kê xếp hạng (stats) của một tựa game.
+ * @route GET /api/reviews/game/:gameId
+ * @param {object} req - Express request object (params: gameId)
+ * @param {object} res - Express response object
+ */
 const getGameReviews = async (req, res) => {
   try {
     const { gameId } = req.params;
@@ -15,7 +20,12 @@ const getGameReviews = async (req, res) => {
   }
 };
 
-// Tạo review mới (yêu cầu đăng nhập)
+/**
+ * Tạo đánh giá mới cho một tựa game (yêu cầu đăng nhập, mỗi user chỉ đánh giá 1 lần/game).
+ * @route POST /api/reviews/game/:gameId
+ * @param {object} req - Express request object (params: gameId, body: rating, content)
+ * @param {object} res - Express response object
+ */
 const createReview = async (req, res) => {
   try {
     const { gameId } = req.params;
@@ -44,7 +54,12 @@ const createReview = async (req, res) => {
   }
 };
 
-// Cập nhật review (chỉ chủ sở hữu)
+/**
+ * Cập nhật nội dung và số sao đánh giá (chỉ chủ sở hữu đánh giá mới có quyền).
+ * @route PUT /api/reviews/:reviewId
+ * @param {object} req - Express request object (params: reviewId, body: rating, content)
+ * @param {object} res - Express response object
+ */
 const updateReview = async (req, res) => {
   try {
     const { reviewId } = req.params;
@@ -69,7 +84,12 @@ const updateReview = async (req, res) => {
   }
 };
 
-// Xóa review (chỉ chủ sở hữu)
+/**
+ * Xóa đánh giá game (chỉ chủ sở hữu đánh giá mới có quyền).
+ * @route DELETE /api/reviews/:reviewId
+ * @param {object} req - Express request object (params: reviewId)
+ * @param {object} res - Express response object
+ */
 const deleteReview = async (req, res) => {
   try {
     const { reviewId } = req.params;
@@ -86,7 +106,12 @@ const deleteReview = async (req, res) => {
   }
 };
 
-// Lấy review của user hiện tại cho một game
+/**
+ * Lấy đánh giá cá nhân của người dùng hiện tại đối với một tựa game cụ thể.
+ * @route GET /api/reviews/game/:gameId/my-review
+ * @param {object} req - Express request object (params: gameId)
+ * @param {object} res - Express response object
+ */
 const getMyReview = async (req, res) => {
   try {
     const { gameId } = req.params;

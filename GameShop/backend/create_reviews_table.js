@@ -19,14 +19,14 @@ const createTable = async () => {
         UNIQUE (user_id, game_id)
       );
     `);
-    console.log('✅ Bảng reviews đã được tạo thành công!');
+    console.log(' Bảng reviews đã được tạo thành công!');
     console.log('   - user_id: FK → users.id');
     console.log('   - game_id: FK → games.id');
     console.log('   - rating: 1-5 (CHECK constraint)');
     console.log('   - UNIQUE(user_id, game_id): mỗi user chỉ review 1 lần/game');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Lỗi tạo bảng:', error.message);
+    console.error(' Lỗi tạo bảng:', error.message);
     process.exit(1);
   }
 };

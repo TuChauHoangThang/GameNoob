@@ -11,7 +11,7 @@
 
 ---
 
-## 🏗️ Công nghệ sử dụng
+##  Công nghệ sử dụng
 
 | Tầng | Công nghệ |
 |---|---|
@@ -23,7 +23,7 @@
 
 ---
 
-## 📁 Cấu trúc dự án
+##  Cấu trúc dự án
 
 ```
 GameShop/
@@ -45,7 +45,7 @@ GameShop/
 
 ---
 
-## 🚀 Hướng dẫn cài đặt
+## Hướng dẫn cài đặt
 
 ### Yêu cầu
 - Node.js >= 18
@@ -114,13 +114,13 @@ Frontend sẽ chạy tại: `http://localhost:5173`
 
 ---
 
-## 🔗 API Endpoints
+## API Endpoints
 
 ### Auth
 | Method | Endpoint | Mô tả | Auth |
 |---|---|---|---|
-| POST | `/api/auth/register` | Đăng ký | ❌ |
-| POST | `/api/auth/login` | Đăng nhập | ❌ |
+| POST | `/api/auth/register` | Đăng ký |  |
+| POST | `/api/auth/login` | Đăng nhập |  |
 | GET | `/api/auth/me` | Lấy thông tin user | ✅ |
 | PUT | `/api/auth/profile` | Cập nhật profile | ✅ |
 
@@ -140,35 +140,50 @@ Frontend sẽ chạy tại: `http://localhost:5173`
 | DELETE | `/api/cart` | Xóa toàn bộ |
 
 ### Checkout
-| Method | Endpoint | Mô tả |
-|---|---|---|
-| POST | `/api/checkout/process` | Thanh toán bằng thẻ mới |
-| POST | `/api/checkout/saved-card` | Thanh toán bằng thẻ đã lưu |
-| GET | `/api/checkout/orders` | Lịch sử đơn hàng |
-| GET | `/api/checkout/library` | Thư viện game |
+| Method | Endpoint | Mô tả | Auth |
+|---|---|---|---|
+| POST | `/api/checkout/process` | Thanh toán bằng thẻ mới | ✅ |
+| POST | `/api/checkout/saved-card` | Thanh toán bằng thẻ đã lưu | ✅ |
+| POST | `/api/checkout/vnpay/create` | Tạo URL thanh toán VNPay | ✅ |
+| GET | `/api/checkout/vnpay/return` | Xử lý kết quả trả về từ VNPay |  |
+| GET | `/api/checkout/orders` | Lịch sử đơn hàng | ✅ |
+| GET | `/api/checkout/library` | Thư viện game | ✅ |
 
 ### Wishlist
-| Method | Endpoint | Mô tả |
-|---|---|---|
-| GET | `/api/wishlist` | Danh sách wishlist |
-| POST | `/api/wishlist` | Thêm vào wishlist |
-| DELETE | `/api/wishlist/:gameId` | Xóa khỏi wishlist |
+| Method | Endpoint | Mô tả | Auth |
+|---|---|---|---|
+| GET | `/api/wishlist` | Danh sách wishlist | ✅ |
+| POST | `/api/wishlist` | Thêm vào wishlist | ✅ |
+| DELETE | `/api/wishlist/:gameId` | Xóa khỏi wishlist | ✅ |
+
+### Community
+| Method | Endpoint | Mô tả | Auth |
+|---|---|---|---|
+| GET | `/api/posts` | Danh sách bài viết cộng đồng |  |
+| POST | `/api/posts` | Tạo bài viết mới (kèm ảnh/video) | ✅ |
+| PUT | `/api/posts/:postId` | Cập nhật bài viết | ✅ |
+| DELETE | `/api/posts/:postId` | Xóa bài viết | ✅ |
+| POST | `/api/posts/:postId/like` | Thích/Bỏ thích bài viết | ✅ |
+| GET | `/api/posts/:postId/comments` | Lấy danh sách bình luận |  |
+| POST | `/api/posts/:postId/comments` | Thêm bình luận | ✅ |
+| PUT | `/api/posts/comments/:commentId` | Sửa bình luận | ✅ |
+| DELETE | `/api/posts/comments/:commentId` | Xóa bình luận | ✅ |
 
 ---
 
-## ✨ Tính năng
+## Tính năng
 
-- 🛒 **Cửa hàng** — Duyệt game theo thể loại, tìm kiếm, sort, phân trang
-- 🎮 **Chi tiết game** — Xem trailer, ảnh, cấu hình, thông tin
-- 🛍️ **Giỏ hàng** — Thêm/xóa, thanh toán với thẻ ngân hàng
-- ❤️ **Wishlist** — Lưu game muốn mua
-- 📚 **Thư viện** — Game đã mua, install/uninstall giả lập
-- 👤 **Hồ sơ cá nhân** — Đổi username, đổi mật khẩu
-- 🔐 **Auth** — JWT, Protected Routes, auto-redirect
+-  **Cửa hàng** — Duyệt game theo thể loại, tìm kiếm, sort, phân trang
+-  **Chi tiết game** — Xem trailer, ảnh, cấu hình, thông tin
+-  **Giỏ hàng** — Thêm/xóa, thanh toán với thẻ ngân hàng
+-  **Wishlist** — Lưu game muốn mua
+- — Game đã mua, install/uninstall giả lập
+- — Đổi username, đổi mật khẩu
+-  **Auth** — JWT, Protected Routes, auto-redirect
 
 ---
 
-## 🌐 Kiểm tra nhanh
+## Kiểm tra nhanh
 
 ```bash
 # Health check

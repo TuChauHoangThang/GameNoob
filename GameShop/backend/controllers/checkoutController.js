@@ -4,7 +4,15 @@ const cartModel = require('../models/cartModel');
 const paymentCardModel = require('../models/paymentCardModel');
 const pool = require('../configs/db');
 
-// ── Helper dùng chung: validate giỏ hàng, tạo order, thêm library, xóa cart ──
+/**
+ * Helper dùng chung xử lý giao dịch đơn hàng.
+ * Thực hiện: validate giỏ hàng, trừ tiền, tạo order, thêm vào library, và dọn sạch giỏ hàng.
+ * @param {object} client - Connection client từ pool kết nối DB (dành cho Transaction)
+ * @param {number} userId - ID người dùng thực hiện checkout
+ * @param {string} paymentMethod - Phương thức thanh toán (Visa, Napas, MoMo...)
+ * @param {string|null} cardLastFour - 4 số cuối của thẻ ngân hàng sử dụng
+ * @returns {Promise<object>} Đối tượng chứa thông tin order, cartItems và totalAmount
+ */
 async function processOrder(client, userId, paymentMethod, cardLastFour) {
   const cartItems = await cartModel.getCartByUserId(userId);
   if (cartItems.length === 0) throw { status: 400, message: 'Giỏ hàng trống.' };
@@ -36,20 +44,16 @@ async function processOrder(client, userId, paymentMethod, cardLastFour) {
   }
 }
 
-// ── Xác định loại thẻ ─────────────────────────────────────────────────────────
-function detectCardType(cardNumber) {
-  if (/^4/.test(cardNumber)) return 'Visa';
-  if (/^5[1-5]/.test(cardNumber)) return 'Mastercard';
-  if (/^3[47]/.test(cardNumber)) return 'Amex';
-  if (/^9704/.test(cardNumber)) return 'Napas';
-  return 'Thẻ ngân hàng';
-}
-
-// ── 1. Thanh toán bằng thẻ ngân hàng ─────────────────────────────────────────
+/**
+ * Thanh toán giỏ hàng bằng thẻ ngân hàng mới (Visa / Mastercard / Napas).
+ * @route POST /api/checkout/process
+ * @param {object} req - Express request object (body: cardNumber, holderName, expiryMonth, expiryYear, cvv, saveCard)
+ * @param {object} res - Express response object
+ */
 const processCheckout = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.userId;  // authenticate middleware set req.userId
+    const userId = req.userId;
     const { cardNumber, holderName, expiryMonth, expiryYear, cvv, saveCard } = req.body;
 
     // Validate thông tin thẻ
@@ -108,9 +112,7 @@ const processCheckout = async (req, res) => {
     await client.query('BEGIN');
 
     try {
-      // *** Mô phỏng xử lý thanh toán ***
-      // Trong thực tế, đây là nơi gọi API payment gateway (VNPay, Momo, Stripe, etc.)
-      // Hiện tại mô phỏng thanh toán thành công
+      // Mô phỏng xử lý thanh toán
       const paymentSuccess = simulatePayment(cleanCardNumber, totalAmount);
       if (!paymentSuccess) {
         await client.query('ROLLBACK');
@@ -161,7 +163,12 @@ const processCheckout = async (req, res) => {
   }
 };
 
-// Thanh toán bằng thẻ đã lưu
+/**
+ * Thanh toán nhanh bằng thẻ đã lưu từ trước.
+ * @route POST /api/checkout/saved-card
+ * @param {object} req - Express request object (body: cardId, cvv)
+ * @param {object} res - Express response object
+ */
 const checkoutWithSavedCard = async (req, res) => {
   const client = await pool.connect();
   try {
@@ -240,7 +247,12 @@ const checkoutWithSavedCard = async (req, res) => {
   }
 };
 
-// Lấy thẻ đã lưu
+/**
+ * Lấy toàn bộ danh sách thẻ ngân hàng đã lưu của người dùng hiện tại.
+ * @route GET /api/checkout/saved-cards
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 const getSavedCards = async (req, res) => {
   try {
     const cards = await paymentCardModel.getCardsByUserId(req.userId);
@@ -251,7 +263,12 @@ const getSavedCards = async (req, res) => {
   }
 };
 
-// Xóa thẻ đã lưu
+/**
+ * Xóa một thẻ ngân hàng đã lưu.
+ * @route DELETE /api/checkout/saved-cards/:id
+ * @param {object} req - Express request object (params: id)
+ * @param {object} res - Express response object
+ */
 const deleteSavedCard = async (req, res) => {
   try {
     const deleted = await paymentCardModel.deleteCard(req.params.id, req.userId);
@@ -265,7 +282,12 @@ const deleteSavedCard = async (req, res) => {
   }
 };
 
-// Lấy lịch sử đơn hàng
+/**
+ * Lấy lịch sử tất cả các đơn hàng đã mua của người dùng hiện tại.
+ * @route GET /api/checkout/orders
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 const getOrderHistory = async (req, res) => {
   try {
     const orders = await orderModel.getOrdersByUserId(req.userId);
@@ -276,7 +298,12 @@ const getOrderHistory = async (req, res) => {
   }
 };
 
-// Lấy thư viện game
+/**
+ * Lấy danh sách toàn bộ các game đã sở hữu trong thư viện người dùng.
+ * @route GET /api/checkout/library
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 const getLibrary = async (req, res) => {
   try {
     const library = await libraryModel.getLibraryByUserId(req.userId);
@@ -287,7 +314,12 @@ const getLibrary = async (req, res) => {
   }
 };
 
-// Kiểm tra game đã sở hữu
+/**
+ * Kiểm tra quyền sở hữu đối với một tập hợp các game ID cụ thể.
+ * @route POST /api/checkout/check-ownership
+ * @param {object} req - Express request object (body: gameIds)
+ * @param {object} res - Express response object
+ */
 const checkOwnership = async (req, res) => {
   try {
     const { gameIds } = req.body;
@@ -299,9 +331,11 @@ const checkOwnership = async (req, res) => {
   }
 };
 
-// === Helper Functions ===
-
-// Xác định loại thẻ từ số thẻ
+/**
+ * Xác định loại thẻ tín dụng / nội địa từ số thẻ ngân hàng.
+ * @param {string} cardNumber - Số thẻ ngân hàng đã chuẩn hóa
+ * @returns {string} Tên loại thẻ (Visa, Mastercard, Amex, Napas...)
+ */
 function detectCardType(cardNumber) {
   if (/^4/.test(cardNumber)) return 'Visa';
   if (/^5[1-5]/.test(cardNumber)) return 'Mastercard';
@@ -311,14 +345,22 @@ function detectCardType(cardNumber) {
   return 'Thẻ ngân hàng';
 }
 
-// Mô phỏng thanh toán (trong thực tế sẽ gọi payment gateway)
+/**
+ * Mô phỏng quá trình giao dịch thanh toán ngân hàng (sandbox).
+ * @param {string} cardNumber - Số thẻ ngân hàng
+ * @param {number} amount - Số tiền giao dịch
+ * @returns {boolean} Luôn trả về true (giả lập thanh toán thành công)
+ */
 function simulatePayment(cardNumber, amount) {
-  // Mô phỏng: tất cả thanh toán đều thành công
-  // Trong production, đây sẽ là nơi tích hợp VNPay, Momo, ZaloPay, etc.
   return true;
 }
 
-// Cập nhật trạng thái cài đặt
+/**
+ * Cập nhật trạng thái cài đặt của game trong thư viện cá nhân (ví dụ: installed, uninstalled).
+ * @route PUT /api/checkout/library/:gameId/install
+ * @param {object} req - Express request object (params: gameId, body: status)
+ * @param {object} res - Express response object
+ */
 const updateInstallStatus = async (req, res) => {
   try {
     const userId = req.userId;
@@ -341,7 +383,12 @@ const updateInstallStatus = async (req, res) => {
   }
 };
 
-// Cập nhật trạng thái yêu thích
+/**
+ * Đổi trạng thái yêu thích (Favorite) của game trong thư viện cá nhân.
+ * @route PUT /api/checkout/library/:gameId/favorite
+ * @param {object} req - Express request object (params: gameId, body: isFavorite)
+ * @param {object} res - Express response object
+ */
 const updateFavoriteStatus = async (req, res) => {
   try {
     const userId = req.userId;
@@ -364,7 +411,12 @@ const updateFavoriteStatus = async (req, res) => {
   }
 };
 
-// ── 3. Thanh toán qua ví điện tử (MoMo / ZaloPay — demo) ────────────────────
+/**
+ * Thanh toán qua ví điện tử nội địa (MoMo / ZaloPay giả lập).
+ * @route POST /api/checkout/ewallet
+ * @param {object} req - Express request object (body: provider, confirmCode)
+ * @param {object} res - Express response object
+ */
 const checkoutWithEWallet = async (req, res) => {
   const client = await pool.connect();
   try {

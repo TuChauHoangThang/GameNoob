@@ -16,6 +16,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import PaymentResultPage from './pages/PaymentResultPage';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
@@ -29,6 +30,7 @@ export default function App() {
       <WishlistProvider>
         <CartProvider>
           <div className="app-root">
+            <ScrollToTop />
             <Navbar onCart={() => setCartOpen(true)} />
             <Routes>
               {/* Public routes */}

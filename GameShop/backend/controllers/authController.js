@@ -3,7 +3,12 @@ const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 const pool = require('../configs/db');
 
-// Đăng ký tài khoản
+/**
+ * Đăng ký tài khoản người dùng mới.
+ * @route POST /api/auth/register
+ * @param {object} req - Express request object (body: username, email, password)
+ * @param {object} res - Express response object
+ */
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -28,7 +33,12 @@ const register = async (req, res) => {
   }
 };
 
-// Đăng nhập
+/**
+ * Đăng nhập người dùng và cấp JWT Token.
+ * @route POST /api/auth/login
+ * @param {object} req - Express request object (body: email, password)
+ * @param {object} res - Express response object
+ */
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -70,7 +80,12 @@ const login = async (req, res) => {
   }
 };
 
-// Cập nhật thông tin cá nhân
+/**
+ * Cập nhật thông tin tài khoản (username và mật khẩu mới).
+ * @route PUT /api/auth/profile
+ * @param {object} req - Express request object (body: username, currentPassword, newPassword)
+ * @param {object} res - Express response object
+ */
 const updateProfile = async (req, res) => {
   try {
     const { username, currentPassword, newPassword } = req.body;
@@ -127,7 +142,12 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Lấy thông tin user hiện tại (dùng token)
+/**
+ * Lấy thông tin tài khoản người dùng đang đăng nhập dựa trên token.
+ * @route GET /api/auth/me
+ * @param {object} req - Express request object (userId được gán từ authMiddleware)
+ * @param {object} res - Express response object
+ */
 const getMe = async (req, res) => {
   try {
     // req.userId được set bởi authMiddleware

@@ -477,6 +477,33 @@
   line-height: 1.7;
   margin-bottom: 16px;
 }
+.checkout-sidebar-agreement {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #8f98a0;
+  line-height: 1.4;
+  text-align: left;
+}
+.checkout-sidebar-agreement input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: #67c1f5;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.checkout-sidebar-agreement label {
+  cursor: pointer;
+  user-select: none;
+}
+.checkout-sidebar-agreement a {
+  color: #67c1f5;
+  text-decoration: underline;
+}
+.checkout-sidebar-agreement a:hover {
+  color: #fff;
+}
 
 /* Purchase Button */
 .checkout-buy-btn {
@@ -518,11 +545,11 @@
   transform: translateY(0);
 }
 .checkout-buy-btn:disabled {
-  background: #3a4a56;
-  color: #556772;
+  background: #3a4a56 !important;
+  color: #556772 !important;
   cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+  transform: none !important;
+  box-shadow: none !important;
 }
 .checkout-buy-btn:disabled::before {
   display: none;

@@ -49,7 +49,7 @@ function detectCardType(cardNumber) {
 const processCheckout = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.user.id;  // authenticate middleware set req.user
+    const userId = req.userId;  // authenticate middleware set req.userId
     const { cardNumber, holderName, expiryMonth, expiryYear, cvv, saveCard } = req.body;
 
     // Validate thông tin thẻ
@@ -165,7 +165,7 @@ const processCheckout = async (req, res) => {
 const checkoutWithSavedCard = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { cardId, cvv } = req.body;
 
     if (!cardId || !cvv) {
@@ -243,7 +243,7 @@ const checkoutWithSavedCard = async (req, res) => {
 // Lấy thẻ đã lưu
 const getSavedCards = async (req, res) => {
   try {
-    const cards = await paymentCardModel.getCardsByUserId(req.user.id);
+    const cards = await paymentCardModel.getCardsByUserId(req.userId);
     res.json({ success: true, data: cards });
   } catch (error) {
     console.error('Lỗi lấy thẻ:', error);
@@ -254,7 +254,7 @@ const getSavedCards = async (req, res) => {
 // Xóa thẻ đã lưu
 const deleteSavedCard = async (req, res) => {
   try {
-    const deleted = await paymentCardModel.deleteCard(req.params.id, req.user.id);
+    const deleted = await paymentCardModel.deleteCard(req.params.id, req.userId);
     if (!deleted) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy thẻ.' });
     }
@@ -268,7 +268,7 @@ const deleteSavedCard = async (req, res) => {
 // Lấy lịch sử đơn hàng
 const getOrderHistory = async (req, res) => {
   try {
-    const orders = await orderModel.getOrdersByUserId(req.user.id);
+    const orders = await orderModel.getOrdersByUserId(req.userId);
     res.json({ success: true, data: orders });
   } catch (error) {
     console.error('Lỗi lấy lịch sử:', error);
@@ -279,7 +279,7 @@ const getOrderHistory = async (req, res) => {
 // Lấy thư viện game
 const getLibrary = async (req, res) => {
   try {
-    const library = await libraryModel.getLibraryByUserId(req.user.id);
+    const library = await libraryModel.getLibraryByUserId(req.userId);
     res.json({ success: true, data: library, count: library.length });
   } catch (error) {
     console.error('Lỗi lấy thư viện:', error);
@@ -291,7 +291,7 @@ const getLibrary = async (req, res) => {
 const checkOwnership = async (req, res) => {
   try {
     const { gameIds } = req.body;
-    const ownedIds = await libraryModel.getOwnedGameIds(req.user.id, gameIds);
+    const ownedIds = await libraryModel.getOwnedGameIds(req.userId, gameIds);
     res.json({ success: true, ownedGameIds: ownedIds });
   } catch (error) {
     console.error('Lỗi kiểm tra:', error);
@@ -321,7 +321,7 @@ function simulatePayment(cardNumber, amount) {
 // Cập nhật trạng thái cài đặt
 const updateInstallStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const gameId = parseInt(req.params.gameId);
     const { status } = req.body;
 
@@ -344,7 +344,7 @@ const updateInstallStatus = async (req, res) => {
 // Cập nhật trạng thái yêu thích
 const updateFavoriteStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const gameId = parseInt(req.params.gameId);
     const { isFavorite } = req.body;
 
@@ -368,7 +368,7 @@ const updateFavoriteStatus = async (req, res) => {
 const checkoutWithEWallet = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { provider, confirmCode } = req.body;
     const SUPPORTED = ['momo', 'zalopay'];
     if (!SUPPORTED.includes(provider))

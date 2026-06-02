@@ -15,6 +15,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
+import PaymentResultPage from './pages/PaymentResultPage';
 import './App.css';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
@@ -46,6 +47,7 @@ export default function App() {
 
               {/* Admin routes */}
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+              <Route path="/checkout/result" element={<PaymentResultPage />} />
             </Routes>
             <Footer />
             <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

@@ -11,7 +11,7 @@ const pool = require('../configs/db');
  */
 exports.createVNPayUrl = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     // Lấy giỏ hàng hiện tại
     const cartItems = await cartModel.getCartByUserId(userId);
@@ -157,7 +157,7 @@ exports.vnpayIPN = async (req, res) => {
  */
 exports.getVNPayStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const { txnRef } = req.params;
     const pending = await vnpayTxnModel.getByTxnRef(txnRef);
 

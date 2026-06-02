@@ -1,6 +1,11 @@
 const cartModel = require('../models/cartModel');
 
-// Lấy giỏ hàng
+/**
+ * Lấy danh sách sản phẩm và tổng số lượng mặt hàng trong giỏ hàng của người dùng hiện tại.
+ * @route GET /api/cart
+ * @param {object} req - Express request object (userId được gán từ authMiddleware)
+ * @param {object} res - Express response object
+ */
 const getCart = async (req, res) => {
   try {
     const items = await cartModel.getCartByUserId(req.userId);
@@ -12,7 +17,12 @@ const getCart = async (req, res) => {
   }
 };
 
-// Thêm vào giỏ hàng
+/**
+ * Thêm sản phẩm game mới vào giỏ hàng cá nhân (Kiểm tra nếu game đã có sẵn để tránh trùng lặp).
+ * @route POST /api/cart/add
+ * @param {object} req - Express request object (body: gameId)
+ * @param {object} res - Express response object
+ */
 const addToCart = async (req, res) => {
   try {
     const { gameId } = req.body;
@@ -34,7 +44,12 @@ const addToCart = async (req, res) => {
   }
 };
 
-// Cập nhật số lượng
+/**
+ * Cập nhật số lượng của một sản phẩm game cụ thể trong giỏ hàng.
+ * @route PUT /api/cart/:id
+ * @param {object} req - Express request object (params: id, body: quantity)
+ * @param {object} res - Express response object
+ */
 const updateQuantity = async (req, res) => {
   try {
     const { id } = req.params;
@@ -48,7 +63,12 @@ const updateQuantity = async (req, res) => {
   }
 };
 
-// Xóa khỏi giỏ hàng
+/**
+ * Xóa một sản phẩm game khỏi giỏ hàng cá nhân dựa vào ID mặt hàng trong giỏ.
+ * @route DELETE /api/cart/:id
+ * @param {object} req - Express request object (params: id)
+ * @param {object} res - Express response object
+ */
 const removeFromCart = async (req, res) => {
   try {
     const { id } = req.params;
@@ -61,7 +81,12 @@ const removeFromCart = async (req, res) => {
   }
 };
 
-// Xóa toàn bộ giỏ hàng
+/**
+ * Xóa toàn bộ sản phẩm và dọn sạch giỏ hàng của người dùng hiện tại.
+ * @route DELETE /api/cart
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 const clearCart = async (req, res) => {
   try {
     await cartModel.clearCart(req.userId);

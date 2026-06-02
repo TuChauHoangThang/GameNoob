@@ -4,11 +4,52 @@ const cartModel = require('../models/cartModel');
 const paymentCardModel = require('../models/paymentCardModel');
 const pool = require('../configs/db');
 
-// Xử lý thanh toán
+// ── Helper dùng chung: validate giỏ hàng, tạo order, thêm library, xóa cart ──
+async function processOrder(client, userId, paymentMethod, cardLastFour) {
+  const cartItems = await cartModel.getCartByUserId(userId);
+  if (cartItems.length === 0) throw { status: 400, message: 'Giỏ hàng trống.' };
+
+  const gameIds = cartItems.map(i => i.game_id);
+  const ownedIds = await libraryModel.getOwnedGameIds(userId, gameIds);
+  if (ownedIds.length > 0) {
+    const names = cartItems.filter(i => ownedIds.includes(i.game_id)).map(i => i.name);
+    throw { status: 400, message: `Bạn đã sở hữu: ${names.join(', ')}`, ownedGameIds: ownedIds };
+  }
+
+  const totalAmount = cartItems.reduce((sum, item) =>
+    sum + (item.is_free ? 0 : (parseInt(item.price_vnd) || 0)), 0);
+
+  await client.query('BEGIN');
+  try {
+    const order = await orderModel.createOrder(userId, totalAmount, paymentMethod, cardLastFour || '');
+    for (const item of cartItems) {
+      const price = item.is_free ? 0 : (parseInt(item.price_vnd) || 0);
+      await orderModel.addOrderItem(order.id, item.game_id, price);
+      await libraryModel.addToLibrary(userId, item.game_id, order.id);
+    }
+    await cartModel.clearCart(userId);
+    await client.query('COMMIT');
+    return { order, cartItems, totalAmount };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  }
+}
+
+// ── Xác định loại thẻ ─────────────────────────────────────────────────────────
+function detectCardType(cardNumber) {
+  if (/^4/.test(cardNumber)) return 'Visa';
+  if (/^5[1-5]/.test(cardNumber)) return 'Mastercard';
+  if (/^3[47]/.test(cardNumber)) return 'Amex';
+  if (/^9704/.test(cardNumber)) return 'Napas';
+  return 'Thẻ ngân hàng';
+}
+
+// ── 1. Thanh toán bằng thẻ ngân hàng ─────────────────────────────────────────
 const processCheckout = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.userId;
+    const userId = req.user.id;  // authenticate middleware set req.user
     const { cardNumber, holderName, expiryMonth, expiryYear, cvv, saveCard } = req.body;
 
     // Validate thông tin thẻ
@@ -124,7 +165,7 @@ const processCheckout = async (req, res) => {
 const checkoutWithSavedCard = async (req, res) => {
   const client = await pool.connect();
   try {
-    const userId = req.userId;
+    const userId = req.user.id;
     const { cardId, cvv } = req.body;
 
     if (!cardId || !cvv) {
@@ -202,7 +243,7 @@ const checkoutWithSavedCard = async (req, res) => {
 // Lấy thẻ đã lưu
 const getSavedCards = async (req, res) => {
   try {
-    const cards = await paymentCardModel.getCardsByUserId(req.userId);
+    const cards = await paymentCardModel.getCardsByUserId(req.user.id);
     res.json({ success: true, data: cards });
   } catch (error) {
     console.error('Lỗi lấy thẻ:', error);
@@ -213,7 +254,7 @@ const getSavedCards = async (req, res) => {
 // Xóa thẻ đã lưu
 const deleteSavedCard = async (req, res) => {
   try {
-    const deleted = await paymentCardModel.deleteCard(req.params.id, req.userId);
+    const deleted = await paymentCardModel.deleteCard(req.params.id, req.user.id);
     if (!deleted) {
       return res.status(404).json({ success: false, message: 'Không tìm thấy thẻ.' });
     }
@@ -227,7 +268,7 @@ const deleteSavedCard = async (req, res) => {
 // Lấy lịch sử đơn hàng
 const getOrderHistory = async (req, res) => {
   try {
-    const orders = await orderModel.getOrdersByUserId(req.userId);
+    const orders = await orderModel.getOrdersByUserId(req.user.id);
     res.json({ success: true, data: orders });
   } catch (error) {
     console.error('Lỗi lấy lịch sử:', error);
@@ -238,7 +279,7 @@ const getOrderHistory = async (req, res) => {
 // Lấy thư viện game
 const getLibrary = async (req, res) => {
   try {
-    const library = await libraryModel.getLibraryByUserId(req.userId);
+    const library = await libraryModel.getLibraryByUserId(req.user.id);
     res.json({ success: true, data: library, count: library.length });
   } catch (error) {
     console.error('Lỗi lấy thư viện:', error);
@@ -250,7 +291,7 @@ const getLibrary = async (req, res) => {
 const checkOwnership = async (req, res) => {
   try {
     const { gameIds } = req.body;
-    const ownedIds = await libraryModel.getOwnedGameIds(req.userId, gameIds);
+    const ownedIds = await libraryModel.getOwnedGameIds(req.user.id, gameIds);
     res.json({ success: true, ownedGameIds: ownedIds });
   } catch (error) {
     console.error('Lỗi kiểm tra:', error);
@@ -280,7 +321,7 @@ function simulatePayment(cardNumber, amount) {
 // Cập nhật trạng thái cài đặt
 const updateInstallStatus = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.id;
     const gameId = parseInt(req.params.gameId);
     const { status } = req.body;
 
@@ -303,7 +344,7 @@ const updateInstallStatus = async (req, res) => {
 // Cập nhật trạng thái yêu thích
 const updateFavoriteStatus = async (req, res) => {
   try {
-    const userId = req.userId;
+    const userId = req.user.id;
     const gameId = parseInt(req.params.gameId);
     const { isFavorite } = req.body;
 
@@ -323,9 +364,40 @@ const updateFavoriteStatus = async (req, res) => {
   }
 };
 
+// ── 3. Thanh toán qua ví điện tử (MoMo / ZaloPay — demo) ────────────────────
+const checkoutWithEWallet = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const userId = req.user.id;
+    const { provider, confirmCode } = req.body;
+    const SUPPORTED = ['momo', 'zalopay'];
+    if (!SUPPORTED.includes(provider))
+      return res.status(400).json({ success: false, message: 'Cổng thanh toán không hỗ trợ.' });
+    if (!confirmCode || confirmCode.trim().length < 4)
+      return res.status(400).json({ success: false, message: 'Mã xác nhận không hợp lệ.' });
+
+    const labels = { momo: 'MoMo', zalopay: 'ZaloPay' };
+    const label = labels[provider];
+
+    const { order, cartItems } = await processOrder(client, userId, label, null);
+
+    return res.json({
+      success: true,
+      message: `Thanh toán qua ${label} thành công!`,
+      order: { id: order.id, totalAmount: order.total_amount, paymentMethod: label, cardLastFour: null, itemCount: cartItems.length, createdAt: order.created_at },
+    });
+  } catch (err) {
+    if (!client._ending) client.query('ROLLBACK').catch(() => {});
+    if (err.status) return res.status(err.status).json({ success: false, message: err.message, ...err });
+    console.error('Lỗi checkout ví:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server.' });
+  } finally { client.release(); }
+};
+
 module.exports = {
   processCheckout,
   checkoutWithSavedCard,
+  checkoutWithEWallet,
   getSavedCards,
   deleteSavedCard,
   getOrderHistory,

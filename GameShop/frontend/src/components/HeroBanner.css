@@ -21,13 +21,23 @@
 .fade-in-slide { animation: fadeIn 0.4s ease forwards; }
 .fade-out { opacity: 0.3; transition: opacity 0.3s ease; }
 
-.hero-bg {
+.hero-bg-img {
   position: absolute;
   inset: 0;
-  background-size: cover;
-  background-position: center top;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
   filter: brightness(0.7);
   transition: all 0.5s ease;
+  z-index: 1;
+}
+
+.hero-bg-fallback {
+  position: absolute;
+  inset: 0;
+  background: var(--steam-darker-bg);
+  z-index: 0;
 }
 
 .hero-overlay {

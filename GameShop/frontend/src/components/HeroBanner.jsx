@@ -22,38 +22,62 @@ export default function HeroBanner() {
         if (res.data.success && res.data.data.length > 0) {
           const allGames = res.data.data;
 
-          // Ưu tiên game có background URL hợp lệ, fallback sang header_image
+          // Hàm lấy ảnh chất lượng cao làm banner (Ưu tiên screenshot đầu tiên)
           const getImage = (g) => {
-            const bg = g.background;
-            const hi = g.header_image;
-            // background thường là URL full màn hình đẹp hơn
-            if (bg && bg.startsWith('http') && !bg.includes('undefined')) return bg;
-            return hi || '';
+            try {
+              if (g.screenshots) {
+                const scr = typeof g.screenshots === 'string'
+                  ? JSON.parse(g.screenshots)
+                  : g.screenshots;
+                if (Array.isArray(scr) && scr.length > 0) {
+                  const firstScr = scr[0].full || scr[0].path_full;
+                  if (firstScr && firstScr.startsWith('http') && !firstScr.includes('undefined')) {
+                    return firstScr;
+                  }
+                }
+              }
+            } catch (e) {
+              console.error('Error parsing screenshots:', e);
+            }
+            // Fallback 1: header_image sắc nét và đầy đủ màu sắc
+            if (g.header_image && g.header_image.startsWith('http') && !g.header_image.includes('undefined')) {
+              return g.header_image;
+            }
+            // Fallback 2: background (ảnh nền của Steam, thường mờ và tối màu)
+            return g.background || '';
           };
 
           // Lọc các game có ảnh hợp lệ
           const validGames = allGames.filter(g => getImage(g));
 
-          const re9      = validGames.find(g => g.name.includes('Resident Evil 9')) || validGames[0];
-          const pragmata = validGames.find(g => g.name.includes('Pragmata'))        || validGames[1];
-          const third    = validGames.find(g =>
-            g.id !== re9?.id && g.id !== pragmata?.id
-          ) || validGames[2];
+          // Hàm xáo trộn mảng ngẫu nhiên
+          const shuffleArray = (array) => {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+          };
 
-          const picks = [re9, pragmata, third].filter(Boolean);
+          // Random lấy tối đa 5 game ngẫu nhiên từ danh sách game hợp lệ
+          const picks = shuffleArray(validGames).slice(0, 5);
+
+          const badges = ['TÂM ĐIỂM CỬA HÀNG', 'SIÊU PHẨM GỢI Ý', 'XU HƯỚNG MỚI', 'ĐỀ XUẤT CHO BẠN', 'BÁN CHẠY NHẤT'];
 
           const games = picks.map((g, idx) => ({
             id:            g.id,
             title:         g.name,
             subtitle:      g.short_description || '',
             image:         getImage(g),
+            fallback:      g.header_image || '',
             tags:          (typeof g.genres === 'string'
                              ? JSON.parse(g.genres || '[]')
                              : (g.genres || [])).slice(0, 3),
             price:         g.price_vnd,
             originalPrice: Math.round((g.price_vnd || 0) / 0.8),
             discount:      g.price_vnd > 0 ? 20 : 0,
-            badge:         idx === 0 ? 'TÂM ĐIỂM 2026' : (idx === 1 ? 'SIÊU PHẨM MỚI' : 'TRENDING'),
+            badge:         badges[idx] || 'TRENDING',
           }));
 
           setSlides(games);
@@ -100,7 +124,22 @@ export default function HeroBanner() {
     <section className="hero-section">
       <div className="hero-slides">
         <div className={`hero-slide ${isAnimating ? 'fade-out' : 'fade-in-slide'}`}>
-          <div className="hero-bg" style={{ backgroundImage: slide.image ? `url(${slide.image})` : 'none' }} />
+          {/* Dùng img tag thay vì CSS background để tránh bị block */}
+          {slide.image && (
+            <img
+              src={slide.image}
+              alt=""
+              className="hero-bg-img"
+              onError={e => {
+                if (slide.fallback && e.target.src !== slide.fallback) {
+                  e.target.src = slide.fallback;
+                } else {
+                  e.target.style.display = 'none';
+                }
+              }}
+            />
+          )}
+          <div className="hero-bg-fallback" />
           <div className="hero-overlay" />
           <div className="hero-content">
             <div className="hero-info">
@@ -137,9 +176,8 @@ export default function HeroBanner() {
                   src={s.image}
                   alt={s.title}
                   onError={e => {
-                    // Fallback: thử header_image nếu background lỗi
-                    if (e.target.src !== s.fallback) {
-                      e.target.onerror = null;
+                    if (s.fallback && e.target.src !== s.fallback) {
+                      e.target.src = s.fallback;
                     }
                   }}
                 />

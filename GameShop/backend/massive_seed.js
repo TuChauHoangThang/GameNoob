@@ -21,9 +21,9 @@ async function fetchAndSave(appid) {
         if (data && data.success && data.data.type === 'game') {
             const g = data.data;
             
-            // Lấy giá VND trực tiếp từ Steam VN
+            // Lấy giá VND trực tiếp từ Steam VN (chia cho 100 để loại bỏ phần cents phụ)
             const priceOverview = g.price_overview;
-            const priceVnd = g.is_free ? 0 : (priceOverview ? priceOverview.final : 0);
+            const priceVnd = g.is_free ? 0 : (priceOverview ? Math.round(priceOverview.final / 100) : 0);
             const priceUsd = Math.round(priceVnd / 25000);
 
             const screenshots = (g.screenshots || []).map(s => ({ id: s.id, full: s.path_full }));

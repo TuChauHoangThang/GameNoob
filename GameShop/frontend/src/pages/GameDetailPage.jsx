@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useCart } from '../context/CartContext';
@@ -9,33 +9,34 @@ import './GameDetailPage.css';
 
 export default function GameDetailPage() {
   const { id } = useParams();
-  const [game, setGame] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [game, setGame]               = useState(null);
+  const [loading, setLoading]         = useState(true);
   const [activeImage, setActiveImage] = useState('');
   const [addedToCart, setAddedToCart] = useState(false);
   const [wishlistMsg, setWishlistMsg] = useState('');
-  const { addToCart, cartItems } = useCart();
-  const { isInWishlist, toggleWishlist } = useWishlist();
-  const { user } = useAuth();
-
-  // Rating states
   const [ratingStats, setRatingStats] = useState(null);
-  const [ratingsList, setRatingsList] = useState([]);
-  const [myRating, setMyRating] = useState(null);
-  const [isOwned, setIsOwned] = useState(false);
-  const [ratingLoading, setRatingLoading] = useState(false);
-  const [showRatingForm, setShowRatingForm] = useState(false);
-  const [ratingForm, setRatingForm] = useState({ is_positive: true, stars: 5, comment: '' });
-  const [ratingSubmitting, setRatingSubmitting] = useState(false);
-  const [ratingMsg, setRatingMsg] = useState('');
+
+  const { addToCart, cartItems, isOwned } = useCart();
+  const { isInWishlist, toggleWishlist }  = useWishlist();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchGame = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/games/${id}`);
         if (res.data.success) {
-          setGame(res.data.data);
-          setActiveImage(res.data.data.header_image);
+          const gameData = res.data.data;
+          setGame(gameData);
+          
+          // Ưu tiên screenshot đầu tiên làm ảnh hoạt động (activeImage) để tránh bị vỡ hình
+          const scr = typeof gameData.screenshots === 'string'
+            ? JSON.parse(gameData.screenshots)
+            : gameData.screenshots || [];
+          if (scr.length > 0) {
+            setActiveImage(scr[0].full || scr[0].path_full || gameData.header_image);
+          } else {
+            setActiveImage(gameData.header_image);
+          }
         }
       } catch (err) {
         console.error('Error fetching game details:', err);
@@ -47,71 +48,13 @@ export default function GameDetailPage() {
     window.scrollTo(0, 0);
   }, [id]);
 
-  // Fetch ratings + ownership khi có game và user
+  // Lấy stats rating để hiển thị trên sidebar
   useEffect(() => {
     if (!id) return;
-    fetchRatings();
-    if (user) {
-      checkOwnershipAndMyRating();
-    }
-  }, [id, user]);
-
-  const fetchRatings = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/ratings/${id}`);
-      if (res.data.success) {
-        setRatingStats(res.data.stats);
-        setRatingsList(res.data.ratings);
-      }
-    } catch (err) {
-      console.error('Lỗi tải ratings:', err);
-    }
-  };
-
-  const checkOwnershipAndMyRating = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const headers = { Authorization: `Bearer ${token}` };
-      const [ownershipRes, myRatingRes] = await Promise.all([
-        axios.post('http://localhost:5000/api/checkout/check-ownership', { gameIds: [parseInt(id)] }, { headers }),
-        axios.get(`http://localhost:5000/api/ratings/${id}/my`, { headers }),
-      ]);
-      if (ownershipRes.data.ownedGameIds?.includes(parseInt(id))) {
-        setIsOwned(true);
-      }
-      if (myRatingRes.data.rating) {
-        setMyRating(myRatingRes.data.rating);
-      }
-    } catch (err) {
-      // Không đăng nhập hoặc lỗi — bỏ qua
-    }
-  };
-
-  const handleSubmitRating = async (e) => {
-    e.preventDefault();
-    setRatingSubmitting(true);
-    setRatingMsg('');
-    try {
-      const token = localStorage.getItem('token');
-      const res = await axios.post(
-        `http://localhost:5000/api/ratings/${id}`,
-        ratingForm,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data.success) {
-        setMyRating(res.data.rating);
-        setShowRatingForm(false);
-        setRatingMsg('✓ Đánh giá của bạn đã được ghi nhận!');
-        fetchRatings(); // Refresh stats + list
-        setTimeout(() => setRatingMsg(''), 3000);
-      }
-    } catch (err) {
-      const msg = err.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.';
-      setRatingMsg(msg);
-    } finally {
-      setRatingSubmitting(false);
-    }
-  };
+    axios.get(`http://localhost:5000/api/ratings/${id}`)
+      .then(res => { if (res.data.success) setRatingStats(res.data.stats); })
+      .catch(() => {});
+  }, [id]);
 
   if (loading) return <div className="loading-screen">Đang tải chi tiết game...</div>;
   if (!game) return <div className="error-screen">Không tìm thấy game! <Link to="/">Quay lại cửa hàng</Link></div>;
@@ -142,7 +85,8 @@ export default function GameDetailPage() {
             </div>
             
             <div className="screenshot-strip">
-              {[game.header_image, ...screenshots.map(s => s.full)].slice(0, 6).map((img, idx) => (
+              {/* Chỉ hiển thị các screenshots độ phân giải cao, nếu không có mới hiển thị header_image */}
+              {(screenshots.length > 0 ? screenshots.map(s => s.full || s.path_full) : [game.header_image]).slice(0, 6).map((img, idx) => (
                 <div 
                   key={idx} 
                   className={`thumb-container ${activeImage === img ? 'active' : ''}`}
@@ -155,151 +99,9 @@ export default function GameDetailPage() {
 
             <div className="detail-info-card">
               <div dangerouslySetInnerHTML={{ __html: game.detailed_description }} className="game-description" />
-              {/* === Phần đánh giá người dùng === */}
+              {/* === Đánh giá người dùng — ReviewSection (hỗ trợ sửa/xóa + rating bars) === */}
               <ReviewSection gameId={id} />
             </div>
-
-            {/* ===== RATING SECTION ===== */}
-            <div className="rating-section">
-              <h3 className="rating-section-title">ĐÁNH GIÁ CỦA NGƯỜI DÙNG</h3>
-
-              {/* Stats bar */}
-              {ratingStats && ratingStats.total_ratings > 0 ? (
-                <div className="rating-stats-bar">
-                  <div className="rating-avg-stars">
-                    {[1,2,3,4,5].map(s => (
-                      <span key={s} className={`star-icon ${s <= Math.round(ratingStats.avg_stars) ? 'star-filled' : 'star-empty'}`}>★</span>
-                    ))}
-                    <span className="rating-avg-num">{ratingStats.avg_stars.toFixed(1)}</span>
-                    <span className="rating-total-count">({ratingStats.total_ratings} đánh giá)</span>
-                  </div>
-                  <div className="rating-sentiment">
-                    <span className="sentiment-positive">👍 {ratingStats.positive_count} Tích cực</span>
-                    <span className="sentiment-negative">👎 {ratingStats.negative_count} Tiêu cực</span>
-                  </div>
-                </div>
-              ) : (
-                <div className="rating-empty-stats">Chưa có đánh giá nào. Hãy là người đầu tiên!</div>
-              )}
-
-              {/* Rating form / status */}
-              {user ? (
-                isOwned ? (
-                  myRating ? (
-                    <div className="my-rating-display">
-                      <span className="my-rating-label">Đánh giá của bạn:</span>
-                      <span className={`my-rating-sentiment ${myRating.is_positive ? 'positive' : 'negative'}`}>
-                        {myRating.is_positive ? '👍 Tích cực' : '👎 Tiêu cực'}
-                      </span>
-                      <span className="my-rating-stars">
-                        {[1,2,3,4,5].map(s => (
-                          <span key={s} className={s <= myRating.stars ? 'star-filled' : 'star-empty'}>★</span>
-                        ))}
-                      </span>
-                      {myRating.comment && <p className="my-rating-comment">"{myRating.comment}"</p>}
-                    </div>
-                  ) : (
-                    <div className="rating-form-wrapper">
-                      {!showRatingForm ? (
-                        <button className="btn btn-green rating-open-btn" onClick={() => setShowRatingForm(true)}>
-                          ✍️ Viết đánh giá của bạn
-                        </button>
-                      ) : (
-                        <form className="rating-form" onSubmit={handleSubmitRating}>
-                          <div className="rating-form-row">
-                            <label className="rating-form-label">Cảm nhận:</label>
-                            <div className="sentiment-btns">
-                              <button
-                                type="button"
-                                className={`sentiment-btn ${ratingForm.is_positive ? 'active-positive' : ''}`}
-                                onClick={() => setRatingForm(f => ({ ...f, is_positive: true }))}
-                              >👍 Tích cực</button>
-                              <button
-                                type="button"
-                                className={`sentiment-btn ${!ratingForm.is_positive ? 'active-negative' : ''}`}
-                                onClick={() => setRatingForm(f => ({ ...f, is_positive: false }))}
-                              >👎 Tiêu cực</button>
-                            </div>
-                          </div>
-
-                          <div className="rating-form-row">
-                            <label className="rating-form-label">Số sao:</label>
-                            <div className="star-picker">
-                              {[1,2,3,4,5].map(s => (
-                                <span
-                                  key={s}
-                                  className={`star-pick ${s <= ratingForm.stars ? 'star-filled' : 'star-empty'}`}
-                                  onClick={() => setRatingForm(f => ({ ...f, stars: s }))}
-                                >★</span>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="rating-form-row">
-                            <label className="rating-form-label">Nhận xét:</label>
-                            <textarea
-                              className="rating-textarea"
-                              placeholder="Chia sẻ trải nghiệm của bạn về game này... (không bắt buộc)"
-                              value={ratingForm.comment}
-                              onChange={e => setRatingForm(f => ({ ...f, comment: e.target.value }))}
-                              rows={3}
-                              maxLength={500}
-                            />
-                          </div>
-
-                          <div className="rating-form-actions">
-                            <button type="submit" className="btn btn-green" disabled={ratingSubmitting}>
-                              {ratingSubmitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-                            </button>
-                            <button type="button" className="btn btn-dark" onClick={() => setShowRatingForm(false)}>
-                              Hủy
-                            </button>
-                          </div>
-                        </form>
-                      )}
-                      {ratingMsg && <div className="rating-msg">{ratingMsg}</div>}
-                    </div>
-                  )
-                ) : (
-                  <div className="rating-not-owned">
-                    🔒 Bạn cần mua game này để có thể đánh giá.
-                  </div>
-                )
-              ) : (
-                <div className="rating-not-owned">
-                  <Link to="/login">Đăng nhập</Link> để đánh giá game (yêu cầu đã mua game).
-                </div>
-              )}
-
-              {ratingMsg && myRating && <div className="rating-msg success">{ratingMsg}</div>}
-
-              {/* Reviews list */}
-              {ratingsList.length > 0 && (
-                <div className="reviews-list">
-                  <h4 className="reviews-list-title">Tất cả đánh giá ({ratingsList.length})</h4>
-                  {ratingsList.map(r => (
-                    <div key={r.id} className="review-item">
-                      <div className="review-header">
-                        <span className="review-username">{r.username}</span>
-                        <span className={`review-sentiment ${r.is_positive ? 'positive' : 'negative'}`}>
-                          {r.is_positive ? '👍 Tích cực' : '👎 Tiêu cực'}
-                        </span>
-                        <span className="review-stars">
-                          {[1,2,3,4,5].map(s => (
-                            <span key={s} className={s <= r.stars ? 'star-filled' : 'star-empty'}>★</span>
-                          ))}
-                        </span>
-                        <span className="review-date">
-                          {new Date(r.created_at).toLocaleDateString('vi-VN')}
-                        </span>
-                      </div>
-                      {r.comment && <p className="review-comment">{r.comment}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* ===== END RATING SECTION ===== */}
           </div>
 
           {/* Sidebar Info */}

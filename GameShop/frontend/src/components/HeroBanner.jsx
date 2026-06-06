@@ -18,27 +18,44 @@ export default function HeroBanner() {
   useEffect(() => {
     const fetchHeroGames = async () => {
       try {
-        // Fetch specific modern AAA games for the hero banner
         const res = await axios.get('http://localhost:5000/api/games?limit=50');
         if (res.data.success && res.data.data.length > 0) {
           const allGames = res.data.data;
-          
-          // Find specific favorites
-          const re9 = allGames.find(g => g.name.includes('Resident Evil 9')) || allGames[0];
-          const pragmata = allGames.find(g => g.name.includes('Pragmata')) || allGames[1];
-          const third = allGames.find(g => !g.name.includes('Resident Evil 9') && !g.name.includes('Pragmata')) || allGames[2];
 
-          const games = [re9, pragmata, third].map((g, idx) => ({
-            id: g.id,
-            title: g.name,
-            subtitle: g.short_description,
-            image: g.background || g.header_image,
-            tags: typeof g.genres === 'string' ? JSON.parse(g.genres).slice(0, 3) : g.genres.slice(0, 3),
-            price: g.price_vnd,
-            originalPrice: Math.round(g.price_vnd / 0.8),
-            discount: 20,
-            badge: idx === 0 ? 'TÂM ĐIỂM 2026' : (idx === 1 ? 'SIÊU PHẨM MỚI' : 'TRENDING')
+          // Ưu tiên game có background URL hợp lệ, fallback sang header_image
+          const getImage = (g) => {
+            const bg = g.background;
+            const hi = g.header_image;
+            // background thường là URL full màn hình đẹp hơn
+            if (bg && bg.startsWith('http') && !bg.includes('undefined')) return bg;
+            return hi || '';
+          };
+
+          // Lọc các game có ảnh hợp lệ
+          const validGames = allGames.filter(g => getImage(g));
+
+          const re9      = validGames.find(g => g.name.includes('Resident Evil 9')) || validGames[0];
+          const pragmata = validGames.find(g => g.name.includes('Pragmata'))        || validGames[1];
+          const third    = validGames.find(g =>
+            g.id !== re9?.id && g.id !== pragmata?.id
+          ) || validGames[2];
+
+          const picks = [re9, pragmata, third].filter(Boolean);
+
+          const games = picks.map((g, idx) => ({
+            id:            g.id,
+            title:         g.name,
+            subtitle:      g.short_description || '',
+            image:         getImage(g),
+            tags:          (typeof g.genres === 'string'
+                             ? JSON.parse(g.genres || '[]')
+                             : (g.genres || [])).slice(0, 3),
+            price:         g.price_vnd,
+            originalPrice: Math.round((g.price_vnd || 0) / 0.8),
+            discount:      g.price_vnd > 0 ? 20 : 0,
+            badge:         idx === 0 ? 'TÂM ĐIỂM 2026' : (idx === 1 ? 'SIÊU PHẨM MỚI' : 'TRENDING'),
           }));
+
           setSlides(games);
         }
       } catch (err) {
@@ -83,7 +100,7 @@ export default function HeroBanner() {
     <section className="hero-section">
       <div className="hero-slides">
         <div className={`hero-slide ${isAnimating ? 'fade-out' : 'fade-in-slide'}`}>
-          <div className="hero-bg" style={{ backgroundImage: `url(${slide.image})` }} />
+          <div className="hero-bg" style={{ backgroundImage: slide.image ? `url(${slide.image})` : 'none' }} />
           <div className="hero-overlay" />
           <div className="hero-content">
             <div className="hero-info">
@@ -116,7 +133,16 @@ export default function HeroBanner() {
                 className={`hero-thumb ${i === current ? 'active' : ''}`}
                 onClick={() => goTo(i)}
               >
-                <img src={s.image} alt={s.title} />
+                <img
+                  src={s.image}
+                  alt={s.title}
+                  onError={e => {
+                    // Fallback: thử header_image nếu background lỗi
+                    if (e.target.src !== s.fallback) {
+                      e.target.onerror = null;
+                    }
+                  }}
+                />
                 <span className="thumb-title">{s.title}</span>
               </button>
             ))}

@@ -45,6 +45,16 @@ function InstallButton({ game, onStatusChange }) {
   const [status, setStatus] = useState(game.install_status || 'not_installed');
   const [progress, setProgress] = useState(0);
 
+  const triggerDownload = useCallback((gameId) => {
+    // Tạo link tải ẩn và click
+    const link = document.createElement('a');
+    link.href = `${API}/games/${gameId}/download`;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, []);
+
   const handleInstall = useCallback(async () => {
     if (status === 'installed') {
       // Gỡ cài đặt
@@ -55,10 +65,13 @@ function InstallButton({ game, onStatusChange }) {
     }
     if (status === 'installing') return;
 
-    // Bắt đầu cài đặt
+    // Bắt đầu cài đặt — tải file thật
     setStatus('installing');
     setProgress(0);
     await onStatusChange(game.game_id, 'installing');
+
+    // Trigger download thật
+    triggerDownload(game.game_id);
 
     // Giả lập tiến trình cài đặt (frontend simulation)
     let prog = 0;
@@ -74,7 +87,7 @@ function InstallButton({ game, onStatusChange }) {
         setProgress(Math.round(prog));
       }
     }, 400);
-  }, [status, game.game_id, onStatusChange]);
+  }, [status, game.game_id, onStatusChange, triggerDownload]);
 
   if (status === 'installing') {
     return (
@@ -83,7 +96,7 @@ function InstallButton({ game, onStatusChange }) {
           <div className="install-progress-fill" style={{ width: `${progress}%` }} />
         </div>
         <div className="install-progress-label">
-          <span>Đang cài đặt...</span>
+          <span>Đang tải xuống...</span>
           <span>{progress}%</span>
         </div>
       </div>

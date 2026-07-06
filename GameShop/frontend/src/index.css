@@ -45,6 +45,50 @@
   --shadow-card: 0 4px 20px rgba(0,0,0,0.5);
   --shadow-glow-blue: 0 0 20px rgba(102,192,244,0.3);
   --shadow-glow-green: 0 0 20px rgba(164,208,7,0.3);
+
+  /* Skeleton variables */
+  --skeleton-base: #1e2d3d;
+  --skeleton-highlight: #243545;
+}
+
+/* ========================================
+   LIGHT THEME VARIABLES
+======================================== */
+html[data-theme="light"] {
+  /* Colors - Rich Slate Blue Light Theme (Darker & Brighter blue tones) */
+  --steam-darker-bg: #b8c5d6;
+  --steam-dark-bg: #cad5e3;
+  --steam-card-bg: #dbe3ec;
+  --steam-panel-bg: #9cb3c9;
+  --steam-highlight: #101f30;
+  --steam-text: #20354b;
+  --steam-text-dim: #41576f;
+  --steam-blue: #0c5c8f;
+  --steam-blue-hover: #05446c;
+  --steam-blue-dark: #012b47;
+  --steam-blue-btn: #0c5c8f;
+  --steam-green: #d9edd0;
+  --steam-green-bright: #2f5d07;
+  --steam-orange: #b33939;
+  --steam-red: #8f1d1d;
+  --steam-gold: #c58d01;
+  --steam-border: #8ca6bd;
+  --steam-border-light: #acc1d3;
+  --steam-overlay: rgba(27, 40, 56, 0.3);
+
+  /* Gradients */
+  --gradient-header: linear-gradient(135deg, #cad5e3 0%, #b8c5d6 100%);
+  --gradient-hero: linear-gradient(180deg, transparent 40%, rgba(202, 213, 227, 0.95) 80%, #cad5e3 100%);
+  --gradient-card: linear-gradient(180deg, transparent 50%, rgba(219, 227, 236, 0.95) 100%);
+  --gradient-blue: linear-gradient(135deg, #0c5c8f, #2d82b7);
+  --gradient-discount: linear-gradient(135deg, #2f5d07, #44800b);
+
+  /* Skeleton */
+  --skeleton-base: #b8c5d6;
+  --skeleton-highlight: #9cb3c9;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(16, 31, 48, 0.2);
 }
 
 /* ========================================
@@ -284,7 +328,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #1e2d3d 25%, #243545 50%, #1e2d3d 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;

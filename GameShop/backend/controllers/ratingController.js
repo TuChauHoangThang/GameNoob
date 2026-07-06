@@ -1,6 +1,5 @@
 const ratingModel = require('../models/ratingModel');
 const libraryModel = require('../models/libraryModel');
-const pool = require('../configs/db');
 
 // Lấy danh sách rating + thống kê của một game
 exports.getGameRatings = async (req, res) => {

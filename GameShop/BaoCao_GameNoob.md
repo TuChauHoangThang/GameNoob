@@ -74,6 +74,20 @@
 - `bcryptjs` với salt rounds = 10
 - Mật khẩu không bao giờ được lưu dạng plaintext
 
+**Validation – express-validator:**
+- Middleware `validate.js` xử lý lỗi validation thống nhất, trả về `{ field, message }`
+- `authValidators`: đăng ký (username 3–50 ký tự, email hợp lệ, password ≥ 6), đăng nhập, cập nhật profile
+- `checkoutValidators`: số thẻ 16 số, CVV, expiry, e-wallet provider
+- `cartValidators`, `ratingValidators`, `postValidators`: validate input trước khi vào controller
+- Validation chạy ở tầng route (server-side), bổ sung cho HTML5 validation phía client
+
+**ORM – Sequelize (tương đương JPA):**
+- `backend/orm/index.js` định nghĩa models: User, Game, Cart, Order, Wishlist, Review, CommunityPost...
+- Quan hệ: `User.hasMany(Cart)`, `Order.hasMany(OrderItem)`, `Game.belongsToMany` qua include
+- Models layer (`models/*.js`) dùng Sequelize API: `findAll`, `create`, `findOne`, `include` (JOIN)
+- Transaction: `sequelize.transaction()` thay cho raw `BEGIN/COMMIT/ROLLBACK` thủ công
+- Schema sync: `initORM()` khi server khởi động (`sequelize.sync({ alter: false })`)
+
 **Upload file:**
 - `Multer` với `diskStorage` – lưu file vào thư mục `uploads/`
 - Kiểm tra MIME type: cho phép `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `video/mp4`, `video/webm`, `video/quicktime`
@@ -207,6 +221,8 @@ payment_cards   – id, user_id, card_type, last_four, holder_name, expiry_*
 
 #### Đã hoàn thành:
 - ✅ Hệ thống xác thực đầy đủ (đăng ký, đăng nhập, JWT, phân quyền)
+- ✅ Sequelize ORM với models, associations và transaction
+- ✅ Validation server-side với express-validator (auth, checkout, cart, rating, post)
 - ✅ Giao diện Steam-style responsive, hỗ trợ đa thiết bị
 - ✅ Cơ sở dữ liệu với hơn 100 game được seed từ Steam API
 - ✅ Giỏ hàng thông minh (chặn thêm game đã sở hữu, chặn trùng lặp)
@@ -228,13 +244,16 @@ payment_cards   – id, user_id, card_type, last_four, holder_name, expiry_*
 
 | Thành viên | Mã SV | Vai trò | Công việc |
 |------------|-------|---------|-----------|
-| [Họ Tên]   | [MSV] | [Vai trò] | [Mô tả] |
-| [Họ Tên]   | [MSV] | [Vai trò] | [Mô tả] |
-| [Họ Tên]   | [MSV] | [Vai trò] | [Mô tả] |
-| [Họ Tên]   | [MSV] | [Vai trò] | [Mô tả] |
+| Từ Châu Hoàng Thắng | 22130252 | Frontend Lead | React SPA, routing, Context API (Auth/Cart/Wishlist), UI Store/Checkout/Community, tích hợp VNPay frontend, HeroBanner, responsive CSS |
+| Nguyễn Mạnh Hùng | 21130092 | Backend Lead | Express API, MVC controllers/models, JWT auth, Admin Dashboard, Sequelize ORM, express-validator, VNPay backend, PostgreSQL schema |
+
+**Quy trình làm việc nhóm:**
+- Git branch riêng (`HoangThang`, `ManhHung`) → Pull Request → merge vào `main`
+- Phân chia theo module: Thắng phụ trách frontend + UX, Hùng phụ trách backend + database + payment
+- Review code qua GitHub PR trước khi merge
 
 ---
 
-*Báo cáo được thực hiện cho môn học: ______________________*
-*Giảng viên hướng dẫn: ______________________*
+*Báo cáo được thực hiện cho môn học: Chuyên Đề Web*
+*Giảng viên hướng dẫn: ThS. Lê Phi Hùng*
 *Năm học: 2025 – 2026*

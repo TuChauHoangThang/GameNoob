@@ -2,6 +2,13 @@ const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
 const authMiddleware = require('../middleware/authMiddleware');
+const validate = require('../middleware/validate');
+const {
+  createPostRules,
+  updatePostRules,
+  addCommentRules,
+  updateCommentRules,
+} = require('../validators/postValidators');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -76,11 +83,11 @@ router.get('/', optionalAuth, postController.getPosts);
 router.get('/:postId/comments', postController.getComments);
 
 // Protected
-router.post('/', authMiddleware, handleUpload, postController.createPost);
-router.put('/:postId', authMiddleware, postController.updatePost);
+router.post('/', authMiddleware, handleUpload, createPostRules, validate, postController.createPost);
+router.put('/:postId', authMiddleware, updatePostRules, validate, postController.updatePost);
 router.post('/:postId/like', authMiddleware, postController.toggleLike);
-router.post('/:postId/comments', authMiddleware, postController.addComment);
-router.put('/comments/:commentId', authMiddleware, postController.updateComment);
+router.post('/:postId/comments', authMiddleware, addCommentRules, validate, postController.addComment);
+router.put('/comments/:commentId', authMiddleware, updateCommentRules, validate, postController.updateComment);
 router.delete('/comments/:commentId', authMiddleware, postController.deleteComment);
 router.delete('/:postId', authMiddleware, postController.deletePost);
 

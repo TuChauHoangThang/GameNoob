@@ -5,6 +5,7 @@ import StorePage from './pages/StorePage';
 import GameDetailPage from './pages/GameDetailPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
 import CartDrawer from './components/CartDrawer';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
@@ -21,14 +22,16 @@ import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <CartProvider>
-          <div className="app-root">
+    <ThemeProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <div className="app-root">
             <Navbar onCart={() => setCartOpen(true)} />
             <Routes>
               {/* Public routes */}
@@ -36,6 +39,7 @@ export default function App() {
               <Route path="/game/:id" element={<GameDetailPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/community" element={<CommunityPage />} />
 
               {/* Protected routes — yêu cầu đăng nhập */}
@@ -52,8 +56,9 @@ export default function App() {
             <Footer />
             <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
           </div>
-        </CartProvider>
-      </WishlistProvider>
-    </AuthProvider>
+          </CartProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

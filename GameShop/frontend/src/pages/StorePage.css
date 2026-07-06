@@ -274,7 +274,7 @@
 }
 
 /* Stats */
-.stats-grid {
+.store-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
@@ -508,7 +508,7 @@
 }
 
 /* Stats */
-.stats-grid {
+.store-stats-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;

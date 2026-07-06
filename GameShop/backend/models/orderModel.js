@@ -1,31 +1,29 @@
-const pool = require('../configs/db');
+const { Order, OrderItem, Game } = require('../orm');
+const { sequelize } = require('../orm');
 
-// Tạo đơn hàng mới
-const createOrder = async (userId, totalAmount, paymentMethod, cardLastFour) => {
-  const result = await pool.query(
-    `INSERT INTO orders (user_id, total_amount, payment_method, card_last_four, status)
-     VALUES ($1, $2, $3, $4, 'completed')
-     RETURNING *`,
-    [userId, totalAmount, paymentMethod, cardLastFour]
-  );
-  return result.rows[0];
+const createOrder = async (userId, totalAmount, paymentMethod, cardLastFour, transaction) => {
+  const order = await Order.create({
+    user_id: userId,
+    total_amount: totalAmount,
+    payment_method: paymentMethod,
+    card_last_four: cardLastFour,
+    status: 'completed',
+  }, { transaction });
+  return order.get({ plain: true });
 };
 
-// Thêm item vào đơn hàng
-const addOrderItem = async (orderId, gameId, price) => {
-  const result = await pool.query(
-    `INSERT INTO order_items (order_id, game_id, price_at_purchase)
-     VALUES ($1, $2, $3)
-     RETURNING *`,
-    [orderId, gameId, price]
-  );
-  return result.rows[0];
+const addOrderItem = async (orderId, gameId, price, transaction) => {
+  const item = await OrderItem.create({
+    order_id: orderId,
+    game_id: gameId,
+    price_at_purchase: price,
+  }, { transaction });
+  return item.get({ plain: true });
 };
 
-// Lấy lịch sử đơn hàng của user
 const getOrdersByUserId = async (userId) => {
-  const result = await pool.query(
-    `SELECT o.*, 
+  const [results] = await sequelize.query(
+    `SELECT o.*,
             json_agg(json_build_object(
               'game_id', oi.game_id,
               'name', g.name,
@@ -35,18 +33,17 @@ const getOrdersByUserId = async (userId) => {
      FROM orders o
      JOIN order_items oi ON o.id = oi.order_id
      JOIN games g ON oi.game_id = g.id
-     WHERE o.user_id = $1
+     WHERE o.user_id = :userId
      GROUP BY o.id
      ORDER BY o.created_at DESC`,
-    [userId]
+    { replacements: { userId }, type: sequelize.QueryTypes.SELECT }
   );
-  return result.rows;
+  return results;
 };
 
-// Lấy chi tiết đơn hàng
 const getOrderById = async (orderId, userId) => {
-  const result = await pool.query(
-    `SELECT o.*, 
+  const [result] = await sequelize.query(
+    `SELECT o.*,
             json_agg(json_build_object(
               'game_id', oi.game_id,
               'name', g.name,
@@ -56,11 +53,11 @@ const getOrderById = async (orderId, userId) => {
      FROM orders o
      JOIN order_items oi ON o.id = oi.order_id
      JOIN games g ON oi.game_id = g.id
-     WHERE o.id = $1 AND o.user_id = $2
+     WHERE o.id = :orderId AND o.user_id = :userId
      GROUP BY o.id`,
-    [orderId, userId]
+    { replacements: { orderId, userId }, type: sequelize.QueryTypes.SELECT }
   );
-  return result.rows[0];
+  return result || null;
 };
 
 module.exports = {

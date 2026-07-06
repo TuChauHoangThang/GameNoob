@@ -1,40 +1,32 @@
-const pool = require('../configs/db');
+const { Wishlist, Game } = require('../orm');
 
 const getWishlistByUserId = async (userId) => {
-  const query = `
-    SELECT w.id as wishlist_id, w.added_at, g.* 
-    FROM wishlists w
-    JOIN games g ON w.game_id = g.id
-    WHERE w.user_id = $1
-    ORDER BY w.added_at DESC
-  `;
-  const result = await pool.query(query, [userId]);
-  return result.rows;
+  const items = await Wishlist.findAll({
+    where: { user_id: userId },
+    include: [{ model: Game }],
+    order: [['added_at', 'DESC']],
+  });
+
+  return items.map((item) => {
+    const plain = item.get({ plain: true });
+    return { wishlist_id: plain.id, added_at: plain.added_at, ...plain.Game };
+  });
 };
 
 const addToWishlist = async (userId, gameId) => {
-  const query = `
-    INSERT INTO wishlists (user_id, game_id) 
-    VALUES ($1, $2) 
-    ON CONFLICT (user_id, game_id) DO NOTHING
-    RETURNING *;
-  `;
-  const result = await pool.query(query, [userId, gameId]);
-  return result.rows[0];
+  const [record, created] = await Wishlist.findOrCreate({
+    where: { user_id: userId, game_id: gameId },
+    defaults: { user_id: userId, game_id: gameId },
+  });
+  return created ? record.get({ plain: true }) : null;
 };
 
 const removeFromWishlist = async (userId, gameId) => {
-  const query = `
-    DELETE FROM wishlists 
-    WHERE user_id = $1 AND game_id = $2
-    RETURNING *;
-  `;
-  const result = await pool.query(query, [userId, gameId]);
-  return result.rows[0];
+  const record = await Wishlist.findOne({ where: { user_id: userId, game_id: gameId } });
+  if (!record) return null;
+  const plain = record.get({ plain: true });
+  await record.destroy();
+  return plain;
 };
 
-module.exports = {
-  getWishlistByUserId,
-  addToWishlist,
-  removeFromWishlist
-};
+module.exports = { getWishlistByUserId, addToWishlist, removeFromWishlist };

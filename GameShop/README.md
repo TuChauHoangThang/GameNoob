@@ -18,6 +18,8 @@
 | Frontend | React 19 + Vite + React Router v7 |
 | Backend | Node.js + Express 5 |
 | Database | PostgreSQL |
+| ORM | Sequelize 6 (tương đương JPA) |
+| Validation | express-validator |
 | Auth | JWT + bcryptjs |
 | Containerization | Docker Compose |
 

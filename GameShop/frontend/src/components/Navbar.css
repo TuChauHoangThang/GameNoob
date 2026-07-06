@@ -138,6 +138,35 @@
   background: rgba(255,255,255,0.05);
 }
 
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--steam-text);
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.theme-toggle-btn:hover {
+  color: var(--steam-highlight);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Light mode overrides for navbar hovers */
+html[data-theme="light"] .theme-toggle-btn:hover,
+html[data-theme="light"] .cart-btn:hover,
+html[data-theme="light"] .user-info:hover,
+html[data-theme="light"] .topbar-link:hover,
+html[data-theme="light"] .topbar-link.active,
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .nav-dropdown-trigger:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .cart-count {
   position: absolute;
   top: -2px;

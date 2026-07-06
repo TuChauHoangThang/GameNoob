@@ -4,5 +4,6 @@ const gameController = require('../controllers/gameController');
 
 router.get('/', gameController.getGames);
 router.get('/:id', gameController.getGameById);
+router.get('/:id/download', gameController.downloadGame);
 
 module.exports = router;

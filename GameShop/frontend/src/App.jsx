@@ -17,6 +17,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminDashboard from './pages/AdminDashboard';
 import PaymentResultPage from './pages/PaymentResultPage';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 import { useState } from 'react';
 import { AuthProvider } from './context/AuthContext';

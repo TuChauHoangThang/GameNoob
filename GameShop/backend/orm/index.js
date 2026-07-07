@@ -19,6 +19,7 @@ const User = sequelize.define('User', {
   updatedAt: false,
 });
 
+
 // ── Game ──────────────────────────────────────────────────────────────────────
 const Game = sequelize.define('Game', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },

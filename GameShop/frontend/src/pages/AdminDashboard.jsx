@@ -525,6 +525,7 @@ export default function AdminDashboard() {
     fetchPosts();
   }, [activeTab, postPage, postSearchDebounced]);
 
+
   // Handle delete game
   const handleDeleteGame = async (gameId, gameName) => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa game "${gameName}" khỏi hệ thống?`)) {
@@ -532,8 +533,7 @@ export default function AdminDashboard() {
         const res = await axios.delete(`${API_URL}/admin/games/${gameId}`, getAxiosConfig());
         if (res.data.success) { alert(res.data.message); fetchGames(); }
       } catch (err) { alert(err.response?.data?.message || 'Xóa game thất bại.'); }
-    }
-  };
+
 
   const startEditPrice = (game) => { setEditingGameId(game.id); setEditPrice(game.price_vnd); setEditIsFree(game.is_free); };
 
@@ -597,6 +597,23 @@ export default function AdminDashboard() {
       if (res.data.success) {
         setAddGameMsg({ type: 'success', text: res.data.message });
         setAddGameForm({ name: '', short_description: '', header_image: '', price_vnd: '', is_free: false, genres: '', developers: '', release_date: '' });
+      }
+    } catch (err) {
+      setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Thêm game thất bại.' });
+    } finally {
+      setAddGameLoading(false);
+    }
+  };
+
+  // Save updated game price
+  const handleSavePrice = async (gameId) => {
+    try {
+      const res = await axios.patch(`${API_URL}/admin/games/${gameId}/price`, { price_vnd: editIsFree ? 0 : Number(editPrice), is_free: editIsFree }, getAxiosConfig());
+      if (res.data.success) {
+        alert(res.data.message);
+        setEditingGameId(null);
+        fetchGames();
+
       }
     } catch (err) { setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Thêm game thất bại.' }); }
     finally { setAddGameLoading(false); }
@@ -1212,6 +1229,7 @@ export default function AdminDashboard() {
                         <th style={{ width: '12%' }}>Trạng thái</th>
                         <th style={{ width: '12%' }}>Ngày tham gia</th>
                         <th style={{ width: '16%', textAlign: 'center' }}>Hành động</th>
+
                       </tr>
                     </thead>
                     <tbody>

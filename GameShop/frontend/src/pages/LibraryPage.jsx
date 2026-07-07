@@ -105,6 +105,7 @@ function InstallButton({ game, onStatusChange }) {
     );
   }
 
+
   if (status === 'installed') {
     return (
       <div className="install-btn-group">

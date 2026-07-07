@@ -1,5 +1,11 @@
 const wishlistModel = require('../models/wishlistModel');
 
+/**
+ * Lấy danh sách wishlist của người dùng đang đăng nhập.
+ * @route GET /api/wishlist
+ * @param {object} req - Express request object (userId từ authMiddleware)
+ * @param {object} res - Express response object
+ */
 const getWishlist = async (req, res) => {
   try {
     const userId = req.userId; // Từ authMiddleware
@@ -11,6 +17,13 @@ const getWishlist = async (req, res) => {
   }
 };
 
+/**
+ * Thêm một game vào wishlist của người dùng.
+ * Nếu game đã có trong wishlist, trả về lỗi 400.
+ * @route POST /api/wishlist
+ * @param {object} req - Express request object (body: gameId)
+ * @param {object} res - Express response object
+ */
 const addGameToWishlist = async (req, res) => {
   try {
     const userId = req.userId;
@@ -29,6 +42,13 @@ const addGameToWishlist = async (req, res) => {
   }
 };
 
+/**
+ * Xóa một game khỏi wishlist của người dùng.
+ * Trả về 404 nếu game không tồn tại trong wishlist.
+ * @route DELETE /api/wishlist/:gameId
+ * @param {object} req - Express request object (params: gameId)
+ * @param {object} res - Express response object
+ */
 const removeGameFromWishlist = async (req, res) => {
   try {
     const userId = req.userId;

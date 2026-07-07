@@ -269,7 +269,7 @@ export default function StorePage() {
                 { label: 'Tựa game', value: games.length + (hasMore ? '+' : '') },
                 { label: 'Người dùng', value: '250K+' },
                 { label: 'Giao dịch', value: '1.2M+' },
-                { label: 'Đánh giá', value: '4.8/5 ⭐' },
+                { label: 'Đánh giá', value: '4.8 ⭐' },
               ].map(s => (
                 <div key={s.label} className="stat-item">
                   <span className="stat-value">{s.value}</span>

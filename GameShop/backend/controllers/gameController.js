@@ -14,12 +14,15 @@ exports.getGames = async (req, res) => {
     const genre = req.query.genre;
     const search = req.query.q;
     const free = req.query.free;
+    const tag = req.query.tag;
     
     let games;
     if (search) {
       games = await gameModel.searchGames(search, limit, offset);
     } else if (genre) {
       games = await gameModel.getGamesByGenre(genre, limit, offset);
+    } else if (tag) {
+      games = await gameModel.getGamesByTag(tag, limit, offset);
     } else if (free === 'true') {
       games = await gameModel.getFreeGames(limit, offset);
     } else {

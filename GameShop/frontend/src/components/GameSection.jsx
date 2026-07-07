@@ -1,12 +1,17 @@
+import { Link } from 'react-router-dom';
 import GameCard from './GameCard';
 import './GameSection.css';
 
-export default function GameSection({ title, games, variant = 'grid', cols = 5 }) {
+export default function GameSection({ title, games, variant = 'grid', cols = 5, viewMoreLink }) {
   return (
     <section className="game-section">
       <div className="section-title">
         <span>{title}</span>
-        <span className="view-more">Xem thêm &rsaquo;</span>
+        {viewMoreLink && (
+          <Link to={viewMoreLink} className="view-more" style={{ textDecoration: 'none' }}>
+            Xem thêm &rsaquo;
+          </Link>
+        )}
       </div>
       {variant === 'grid' ? (
         <div className="game-grid" style={{ '--cols': cols }}>

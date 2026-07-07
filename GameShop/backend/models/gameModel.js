@@ -89,6 +89,44 @@ const getFreeGames = async (limit = 20, offset = 0) => {
   return games.map((g) => g.get({ plain: true }));
 };
 
+const getGamesByTag = async (tag, limit = 20, offset = 0) => {
+  if (tag === 'new') {
+    const games = await Game.findAll({
+      order: [['id', 'DESC']],
+      limit,
+      offset,
+    });
+    return games.map((g) => g.get({ plain: true }));
+  } else if (tag === 'top') {
+    const results = await sequelize.query(`
+      SELECT g.*, COUNT(oi.id) as sold_count
+      FROM games g
+      LEFT JOIN order_items oi ON oi.game_id = g.id
+      GROUP BY g.id
+      ORDER BY sold_count DESC, g.positive_ratings DESC, g.id DESC
+      LIMIT :limit OFFSET :offset
+    `, {
+      replacements: { limit, offset },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return results;
+  } else if (tag === 'sale') {
+    const results = await sequelize.query(`
+      SELECT * FROM games
+      WHERE price_vnd > 0 AND (id % 3) = 0
+      ORDER BY id DESC
+      LIMIT :limit OFFSET :offset
+    `, {
+      replacements: { limit, offset },
+      type: sequelize.QueryTypes.SELECT
+    });
+    return results;
+  } else if (tag === 'free') {
+    return getFreeGames(limit, offset);
+  }
+  return getAllGames(limit, offset);
+};
+
 module.exports = {
   getAllGames,
   getGamesByGenre,
@@ -97,4 +135,5 @@ module.exports = {
   getGameBySteamAppId,
   upsertGame,
   getFreeGames,
+  getGamesByTag,
 };

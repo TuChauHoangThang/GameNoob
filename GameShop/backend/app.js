@@ -57,11 +57,14 @@ vnpayTxnModel.initTable()
   .then(() => console.log('✓ Bảng vnpay_pending_orders sẵn sàng'))
   .catch(err => console.error('✗ vnpay_pending_orders:', err.message));
 
-// ── Thêm cột is_admin vào users nếu chưa có (migrate) ───────────────────────
+// ── Thêm cột is_admin và is_banned vào users nếu chưa có (migrate) ───────────
 const pool = require('./configs/db');
-pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false`)
-  .then(() => console.log('✓ Cột is_admin trong users sẵn sàng'))
-  .catch(err => console.error('✗ is_admin migrate:', err.message));
+pool.query(`
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT false;
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_banned BOOLEAN DEFAULT false;
+`)
+  .then(() => console.log('✓ Cột is_admin và is_banned trong users sẵn sàng'))
+  .catch(err => console.error('✗ is_admin/is_banned migrate:', err.message));
 
 // ── Thêm cột OTP vào users nếu chưa có (migrate) ────────────────────────────
 pool.query(`

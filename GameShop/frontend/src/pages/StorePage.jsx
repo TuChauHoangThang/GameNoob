@@ -53,10 +53,19 @@ export default function StorePage() {
   const [sortBy, setSortBy]       = useState('default');
   const location = useLocation();
 
+  // Các state cho phần hiển thị trang chủ riêng biệt
+  const [homeNewReleases, setHomeNewReleases] = useState([]);
+  const [homeOnSale, setHomeOnSale]           = useState([]);
+  const [homeTopSellers, setHomeTopSellers]   = useState([]);
+  const [homeSuggested, setHomeSuggested]     = useState([]);
+  const [homeLoading, setHomeLoading]         = useState(true);
+
   const params      = new URLSearchParams(location.search);
   const searchQuery = params.get('q');
   const urlGenre    = params.get('genre');
   const urlTag      = params.get('tag');
+
+  const isFiltered = !!(searchQuery || urlGenre || activeGenre || urlTag);
 
   // Khi filter/search thay đổi → reset về trang đầu
   useEffect(() => {
@@ -66,6 +75,47 @@ export default function StorePage() {
     setGames([]);
     setHasMore(true);
   }, [urlGenre, searchQuery, urlTag]);
+
+  // Luôn load trending/top sellers trên sidebar khi mount
+  useEffect(() => {
+    const fetchTopSellers = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/games?tag=top&limit=10');
+        if (res.data.success) {
+          setHomeTopSellers(res.data.data);
+        }
+      } catch (err) {
+        console.error('Error fetching top sellers:', err);
+      }
+    };
+    fetchTopSellers();
+  }, []);
+
+  // Tải dữ liệu các phần trang chủ riêng biệt nếu không dùng bộ lọc
+  useEffect(() => {
+    if (isFiltered) return;
+
+    const fetchHomeData = async () => {
+      setHomeLoading(true);
+      try {
+        const [resNew, resSale, resSuggested] = await Promise.all([
+          axios.get('http://localhost:5000/api/games?tag=new&limit=5'),
+          axios.get('http://localhost:5000/api/games?tag=sale&limit=12'),
+          axios.get('http://localhost:5000/api/games?limit=10&offset=20'),
+        ]);
+
+        if (resNew.data.success) setHomeNewReleases(resNew.data.data);
+        if (resSale.data.success) setHomeOnSale(resSale.data.data);
+        if (resSuggested.data.success) setHomeSuggested(resSuggested.data.data);
+      } catch (err) {
+        console.error('Error fetching homepage sections:', err);
+      } finally {
+        setHomeLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, [isFiltered]);
 
   // Build URL helper
   const buildUrl = useCallback((currentOffset) => {
@@ -77,14 +127,15 @@ export default function StorePage() {
     if (genre) {
       return `${base}?genre=${encodeURIComponent(genre)}&limit=${PAGE_LIMIT}&offset=${currentOffset}`;
     }
-    if (urlTag === 'free') {
-      return `${base}?free=true&limit=${PAGE_LIMIT}&offset=${currentOffset}`;
+    if (urlTag) {
+      return `${base}?tag=${urlTag}&limit=${PAGE_LIMIT}&offset=${currentOffset}`;
     }
     return `${base}?limit=${PAGE_LIMIT}&offset=${currentOffset}`;
   }, [searchQuery, urlGenre, activeGenre, urlTag]);
 
   // Load trang đầu khi filter thay đổi
   useEffect(() => {
+    if (!isFiltered) return;
     const fetchGames = async () => {
       setLoading(true);
       try {
@@ -101,7 +152,7 @@ export default function StorePage() {
       }
     };
     fetchGames();
-  }, [buildUrl]);
+  }, [buildUrl, isFiltered]);
 
   // Load thêm khi bấm "Xem thêm"
   const loadMore = async () => {
@@ -122,18 +173,12 @@ export default function StorePage() {
   };
 
   const sortedGames  = sortGames(games, sortBy);
-  const newReleases  = sortedGames.slice(0, 10);
-  const topSellers   = [...games].sort((a, b) => (b.positive_ratings + b.negative_ratings) - (a.positive_ratings + a.negative_ratings)).slice(0, 15);
-  const onSaleGames  = sortedGames.filter((g, i) => i % 3 === 0).slice(0, 12);
-  const freeGames    = sortedGames.filter(g => g.is_free);
-
-  const isFiltered = !!(searchQuery || urlGenre || activeGenre || urlTag);
 
   const getActiveLabel = () => {
     if (searchQuery) return null;
     if (urlGenre || activeGenre) return `🎮 Thể loại: ${urlGenre || activeGenre}`;
     if (urlTag === 'sale') return '💸 Đang Giảm Giá';
-    if (urlTag === 'new')  return '🆕 Siêu Phẩm Mới (2026)';
+    if (urlTag === 'new')  return '🆕 Siêu Phẩm Mới';
     if (urlTag === 'top')  return '🏆 Bán Chạy Nhất';
     if (urlTag === 'free') return '🆓 Game Miễn Phí';
     return null;
@@ -198,48 +243,54 @@ export default function StorePage() {
             </div>
           )}
 
-          {loading ? (
-            <div className="section-loading">Đang tải danh sách game...</div>
-          ) : (
-            <>
-              {searchQuery ? (
-                <GameSection title={`🔍 Kết quả tìm kiếm cho: "${searchQuery}"`} games={sortedGames} cols={5} />
-              ) : activeLabel ? (
-                <GameSection
-                  title={activeLabel}
-                  games={urlTag === 'top' ? topSellers : urlTag === 'sale' ? onSaleGames : urlTag === 'free' ? freeGames : sortedGames}
-                  cols={5}
-                />
-              ) : (
-                <>
-                  <GameSection title="🆕 Siêu Phẩm Mới (2026)" games={newReleases.slice(0, 5)} cols={5} />
-                  <GameSection title="💸 Đang Giảm Giá" games={onSaleGames} variant="grid" cols={4} />
-                  <GameSection title="🏆 Bán Chạy Nhất" games={topSellers.slice(0, 10)} cols={5} />
-                  <GameSection title="🎮 Gợi Ý Cho Bạn" games={sortedGames.slice(10, 30)} cols={5} />
-                </>
-              )}
+          {isFiltered ? (
+            loading ? (
+              <div className="section-loading">Đang tải danh sách game...</div>
+            ) : (
+              <>
+                {searchQuery ? (
+                  <GameSection title={`🔍 Kết quả tìm kiếm cho: "${searchQuery}"`} games={sortedGames} cols={5} />
+                ) : (
+                  <GameSection
+                    title={activeLabel}
+                    games={sortedGames}
+                    cols={5}
+                  />
+                )}
 
-              {/* Nút xem thêm — chỉ hiện khi đang filter hoặc search */}
-              {(isFiltered || games.length >= PAGE_LIMIT) && (
-                <div className="load-more-wrap">
-                  {hasMore ? (
-                    <button
-                      className="load-more-btn"
-                      onClick={loadMore}
-                      disabled={loadingMore}
-                    >
-                      {loadingMore ? (
-                        <span className="load-spinner">⏳ Đang tải...</span>
-                      ) : (
-                        '⬇️ Xem thêm game'
-                      )}
-                    </button>
-                  ) : (
-                    <p className="no-more-text">✅ Đã hiển thị tất cả {games.length} tựa game</p>
-                  )}
-                </div>
-              )}
-            </>
+                {/* Nút xem thêm — chỉ hiện khi đang filter hoặc search */}
+                {(isFiltered || games.length >= PAGE_LIMIT) && (
+                  <div className="load-more-wrap">
+                    {hasMore ? (
+                      <button
+                        className="load-more-btn"
+                        onClick={loadMore}
+                        disabled={loadingMore}
+                      >
+                        {loadingMore ? (
+                          <span className="load-spinner">⏳ Đang tải...</span>
+                        ) : (
+                          '⬇️ Xem thêm game'
+                        )}
+                      </button>
+                    ) : (
+                      <p className="no-more-text">✅ Đã hiển thị tất cả {games.length} tựa game</p>
+                    )}
+                  </div>
+                )}
+              </>
+            )
+          ) : (
+            homeLoading ? (
+              <div className="section-loading">Đang tải cửa hàng...</div>
+            ) : (
+              <>
+                <GameSection title="🆕 Siêu Phẩm Mới" games={homeNewReleases} cols={5} viewMoreLink="/?tag=new" />
+                <GameSection title="💸 Đang Giảm Giá" games={homeOnSale} variant="grid" cols={4} viewMoreLink="/?tag=sale" />
+                <GameSection title="🏆 Bán Chạy Nhất" games={homeTopSellers} cols={5} viewMoreLink="/?tag=top" />
+                <GameSection title="🎮 Gợi Ý Cho Bạn" games={homeSuggested} cols={5} viewMoreLink="/?genre=Action" />
+              </>
+            )
           )}
         </div>
 
@@ -247,7 +298,7 @@ export default function StorePage() {
           <div className="sidebar-card">
             <h3 className="sidebar-title">🔥 Trending Hôm Nay</h3>
             <div className="trending-list">
-              {topSellers.slice(0, 6).map((g, i) => (
+              {homeTopSellers.slice(0, 6).map((g, i) => (
                 <div key={g.id} className="trending-item">
                   <span className="trending-rank">{i + 1}</span>
                   <img src={g.header_image} alt={g.name} className="trending-img" />
@@ -266,7 +317,7 @@ export default function StorePage() {
             <h3 className="sidebar-title">📊 Thống Kê</h3>
             <div className="store-stats-grid">
               {[
-                { label: 'Tựa game', value: games.length + (hasMore ? '+' : '') },
+                { label: 'Tựa game', value: isFiltered ? (games.length + (hasMore ? '+' : '')) : '320+' },
                 { label: 'Người dùng', value: '250K+' },
                 { label: 'Giao dịch', value: '1.2M+' },
                 { label: 'Đánh giá', value: '4.8 ⭐' },

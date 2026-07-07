@@ -248,6 +248,44 @@ export default function AdminDashboard() {
   const [editPrice, setEditPrice] = useState(0);
   const [editIsFree, setEditIsFree] = useState(false);
 
+  // Orders tab
+  const [orders, setOrders] = useState([]);
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderSearchDebounced, setOrderSearchDebounced] = useState('');
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderTotal, setOrderTotal] = useState(0);
+  const [orderTotalPages, setOrderTotalPages] = useState(1);
+  const [orderMethodFilter, setOrderMethodFilter] = useState('all');
+  const [orderSort, setOrderSort] = useState('newest');
+
+  // VNPay tab
+  const [vnpayOrders, setVnpayOrders] = useState([]);
+  const [vnpayPage, setVnpayPage] = useState(1);
+  const [vnpayTotal, setVnpayTotal] = useState(0);
+  const [vnpayTotalPages, setVnpayTotalPages] = useState(1);
+
+  // Reviews tab
+  const [reviews, setReviews] = useState([]);
+  const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewSearchDebounced, setReviewSearchDebounced] = useState('');
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+
+  // Posts tab
+  const [posts, setPosts] = useState([]);
+  const [postSearch, setPostSearch] = useState('');
+  const [postSearchDebounced, setPostSearchDebounced] = useState('');
+  const [postPage, setPostPage] = useState(1);
+  const [postTotal, setPostTotal] = useState(0);
+  const [postTotalPages, setPostTotalPages] = useState(1);
+
+  // Add game form
+  const [addGameForm, setAddGameForm] = useState({ name: '', short_description: '', header_image: '', price_vnd: '', is_free: false, genres: '', developers: '', release_date: '' });
+  const [steamAppId, setSteamAppId] = useState('');
+  const [addGameLoading, setAddGameLoading] = useState(false);
+  const [addGameMsg, setAddGameMsg] = useState(null);
+
   // Helper to format currency
   const formatVND = (value) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
@@ -351,6 +389,66 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      setTableLoading(true);
+      const params = new URLSearchParams({ limit: PAGE_SIZE, page: orderPage, sort: orderSort });
+      if (orderSearchDebounced) params.set('q', orderSearchDebounced);
+      if (orderMethodFilter !== 'all') params.set('method', orderMethodFilter);
+      const res = await axios.get(`${API_URL}/admin/orders?${params}`, getAxiosConfig());
+      if (res.data.success) {
+        setOrders(res.data.data);
+        setOrderTotal(res.data.pagination.total);
+        setOrderTotalPages(res.data.pagination.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setTableLoading(false); }
+  };
+
+  const fetchVNPay = async () => {
+    try {
+      setTableLoading(true);
+      const params = new URLSearchParams({ limit: PAGE_SIZE, page: vnpayPage });
+      const res = await axios.get(`${API_URL}/admin/vnpay-orders?${params}`, getAxiosConfig());
+      if (res.data.success) {
+        setVnpayOrders(res.data.data);
+        setVnpayTotal(res.data.pagination.total);
+        setVnpayTotalPages(res.data.pagination.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setTableLoading(false); }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      setTableLoading(true);
+      const params = new URLSearchParams({ limit: PAGE_SIZE, page: reviewPage });
+      if (reviewSearchDebounced) params.set('q', reviewSearchDebounced);
+      const res = await axios.get(`${API_URL}/admin/reviews?${params}`, getAxiosConfig());
+      if (res.data.success) {
+        setReviews(res.data.data);
+        setReviewTotal(res.data.pagination.total);
+        setReviewTotalPages(res.data.pagination.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setTableLoading(false); }
+  };
+
+  const fetchPosts = async () => {
+    try {
+      setTableLoading(true);
+      const params = new URLSearchParams({ limit: PAGE_SIZE, page: postPage });
+      if (postSearchDebounced) params.set('q', postSearchDebounced);
+      const res = await axios.get(`${API_URL}/admin/posts?${params}`, getAxiosConfig());
+      if (res.data.success) {
+        setPosts(res.data.data);
+        setPostTotal(res.data.pagination.total);
+        setPostTotalPages(res.data.pagination.totalPages);
+      }
+    } catch (err) { console.error(err); }
+    finally { setTableLoading(false); }
+  };
+
   useEffect(() => {
     if (activeTab === 'overview') {
       fetchStats();
@@ -389,47 +487,166 @@ export default function AdminDashboard() {
     fetchUsers();
   }, [activeTab, userPage, userSearchDebounced, userRoleFilter, userSort]);
 
+  useEffect(() => {
+    if (activeTab !== 'orders') return;
+    const t = setTimeout(() => setOrderSearchDebounced(orderSearch.trim()), 400);
+    return () => clearTimeout(t);
+  }, [orderSearch, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'orders') return;
+    fetchOrders();
+  }, [activeTab, orderPage, orderSearchDebounced, orderMethodFilter, orderSort]);
+
+  useEffect(() => {
+    if (activeTab !== 'vnpay') return;
+    fetchVNPay();
+  }, [activeTab, vnpayPage]);
+
+  useEffect(() => {
+    if (activeTab !== 'moderation') return;
+    const t = setTimeout(() => setReviewSearchDebounced(reviewSearch.trim()), 400);
+    return () => clearTimeout(t);
+  }, [reviewSearch, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'moderation') return;
+    fetchReviews();
+  }, [activeTab, reviewPage, reviewSearchDebounced]);
+
+  useEffect(() => {
+    if (activeTab !== 'moderation') return;
+    const t = setTimeout(() => setPostSearchDebounced(postSearch.trim()), 400);
+    return () => clearTimeout(t);
+  }, [postSearch, activeTab]);
+
+  useEffect(() => {
+    if (activeTab !== 'moderation') return;
+    fetchPosts();
+  }, [activeTab, postPage, postSearchDebounced]);
+
+
   // Handle delete game
   const handleDeleteGame = async (gameId, gameName) => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa game "${gameName}" khỏi hệ thống?`)) {
       try {
         const res = await axios.delete(`${API_URL}/admin/games/${gameId}`, getAxiosConfig());
-        if (res.data.success) {
-          alert(res.data.message);
-          fetchGames();
-        }
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || 'Xóa game thất bại.');
-      }
-    }
+        if (res.data.success) { alert(res.data.message); fetchGames(); }
+      } catch (err) { alert(err.response?.data?.message || 'Xóa game thất bại.'); }
+
+
+  const startEditPrice = (game) => { setEditingGameId(game.id); setEditPrice(game.price_vnd); setEditIsFree(game.is_free); };
+
+  const handleSavePrice = async (gameId) => {
+    try {
+      const res = await axios.patch(`${API_URL}/admin/games/${gameId}/price`, { price_vnd: editIsFree ? 0 : Number(editPrice), is_free: editIsFree }, getAxiosConfig());
+      if (res.data.success) { alert(res.data.message); setEditingGameId(null); fetchGames(); }
+    } catch (err) { alert(err.response?.data?.message || 'Cập nhật giá thất bại.'); }
   };
 
-  // Trigger inline editing for game price
-  const startEditPrice = (game) => {
-    setEditingGameId(game.id);
-    setEditPrice(game.price_vnd);
-    setEditIsFree(game.is_free);
+  // User management handlers
+  const handleDeleteUser = async (userId, username) => {
+    if (!window.confirm(`Xóa tài khoản "${username}"? Hành động này không thể hoàn tác!`)) return;
+    try {
+      const res = await axios.delete(`${API_URL}/admin/users/${userId}`, getAxiosConfig());
+      if (res.data.success) { alert(res.data.message); fetchUsers(); }
+    } catch (err) { alert(err.response?.data?.message || 'Xóa user thất bại.'); }
+  };
+
+  const handleToggleAdmin = async (userId, username, currentIsAdmin) => {
+    const action = currentIsAdmin ? 'thu hồi quyền admin' : 'cấp quyền admin';
+    if (!window.confirm(`Bạn có muốn ${action} của "${username}"?`)) return;
+    try {
+      const res = await axios.patch(`${API_URL}/admin/users/${userId}/role`, { is_admin: !currentIsAdmin }, getAxiosConfig());
+      if (res.data.success) { alert(res.data.message); fetchUsers(); }
+    } catch (err) { alert(err.response?.data?.message || 'Thất bại.'); }
+  };
+
+  const handleToggleBan = async (userId, username, currentIsBanned) => {
+    const action = currentIsBanned ? 'mở khóa' : 'khóa';
+    if (!window.confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} tài khoản "${username}"?`)) return;
+    try {
+      const res = await axios.patch(`${API_URL}/admin/users/${userId}/ban`, { is_banned: !currentIsBanned }, getAxiosConfig());
+      if (res.data.success) { alert(res.data.message); fetchUsers(); }
+    } catch (err) { alert(err.response?.data?.message || 'Thất bại.'); }
+  };
+
+  // Review/Post moderation
+  const handleDeleteReview = async (id) => {
+    if (!window.confirm('Xóa review này?')) return;
+    try {
+      const res = await axios.delete(`${API_URL}/admin/reviews/${id}`, getAxiosConfig());
+      if (res.data.success) { fetchReviews(); }
+    } catch (err) { alert('Xóa thất bại.'); }
+  };
+
+  const handleDeletePost = async (id, title) => {
+    if (!window.confirm(`Xóa bài "${title}"?`)) return;
+    try {
+      const res = await axios.delete(`${API_URL}/admin/posts/${id}`, getAxiosConfig());
+      if (res.data.success) { fetchPosts(); }
+    } catch (err) { alert('Xóa thất bại.'); }
+  };
+
+  // Add game handlers
+  const handleAddGame = async (e) => {
+    e.preventDefault();
+    setAddGameLoading(true); setAddGameMsg(null);
+    try {
+      const res = await axios.post(`${API_URL}/admin/games`, addGameForm, getAxiosConfig());
+      if (res.data.success) {
+        setAddGameMsg({ type: 'success', text: res.data.message });
+        setAddGameForm({ name: '', short_description: '', header_image: '', price_vnd: '', is_free: false, genres: '', developers: '', release_date: '' });
+      }
+    } catch (err) {
+      setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Thêm game thất bại.' });
+    } finally {
+      setAddGameLoading(false);
+    }
   };
 
   // Save updated game price
   const handleSavePrice = async (gameId) => {
     try {
-      const finalPrice = editIsFree ? 0 : Number(editPrice);
-      const res = await axios.patch(
-        `${API_URL}/admin/games/${gameId}/price`,
-        { price_vnd: finalPrice, is_free: editIsFree },
-        getAxiosConfig()
-      );
+      const res = await axios.patch(`${API_URL}/admin/games/${gameId}/price`, { price_vnd: editIsFree ? 0 : Number(editPrice), is_free: editIsFree }, getAxiosConfig());
       if (res.data.success) {
         alert(res.data.message);
         setEditingGameId(null);
         fetchGames();
+
       }
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || 'Cập nhật giá thất bại.');
-    }
+    } catch (err) { setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Thêm game thất bại.' }); }
+    finally { setAddGameLoading(false); }
+  };
+
+  const handleImportSteam = async () => {
+    if (!steamAppId) return;
+    setAddGameLoading(true); setAddGameMsg(null);
+    try {
+      const res = await axios.post(`${API_URL}/admin/games/import-steam`, { steam_appid: steamAppId }, getAxiosConfig());
+      if (res.data.success) {
+        setAddGameMsg({ type: 'success', text: res.data.message });
+        setSteamAppId('');
+      }
+    } catch (err) { setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Import thất bại.' }); }
+    finally { setAddGameLoading(false); }
+  };
+
+  // Export CSV
+  const handleExport = (type) => {
+    const token = localStorage.getItem('token');
+    const url = `${API_URL}/admin/export/${type}?token=${token}`;
+    window.open(`${API_URL}/admin/export/${type}`, '_blank');
+    // Dùng fetch với auth header để download
+    fetch(`${API_URL}/admin/export/${type}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.blob())
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${type}_export.csv`;
+        a.click();
+      })
+      .catch(() => alert('Xuất dữ liệu thất bại.'));
   };
 
   return (
@@ -466,6 +683,17 @@ export default function AdminDashboard() {
             Kho Games
           </button>
           <button 
+            className={`menu-item-btn ${activeTab === 'add-game' ? 'active' : ''}`}
+            onClick={() => setActiveTab('add-game')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Thêm Game
+          </button>
+          <button 
             className={`menu-item-btn ${activeTab === 'users' ? 'active' : ''}`}
             onClick={() => setActiveTab('users')}
           >
@@ -475,7 +703,48 @@ export default function AdminDashboard() {
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-            Khách hàng
+            Quản lý Users
+          </button>
+          <button 
+            className={`menu-item-btn ${activeTab === 'orders' ? 'active' : ''}`}
+            onClick={() => setActiveTab('orders')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Đơn hàng
+          </button>
+          <button 
+            className={`menu-item-btn ${activeTab === 'vnpay' ? 'active' : ''}`}
+            onClick={() => setActiveTab('vnpay')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+            VNPay
+          </button>
+          <button 
+            className={`menu-item-btn ${activeTab === 'moderation' ? 'active' : ''}`}
+            onClick={() => setActiveTab('moderation')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Kiểm duyệt
+          </button>
+          <button 
+            className={`menu-item-btn ${activeTab === 'export' ? 'active' : ''}`}
+            onClick={() => setActiveTab('export')}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Xuất dữ liệu
           </button>
         </nav>
 
@@ -550,7 +819,12 @@ export default function AdminDashboard() {
             <p>
               {activeTab === 'overview' && 'Hệ thống đo lường hiệu suất kinh doanh & hoạt động GameShop'}
               {activeTab === 'games' && 'Danh mục sản phẩm games đang hoạt động'}
-              {activeTab === 'users' && 'Danh sách tài khoản khách hàng đã đăng ký'}
+              {activeTab === 'add-game' && 'Thêm game mới thủ công hoặc import từ Steam AppID'}
+              {activeTab === 'users' && 'Quản lý tài khoản: phân quyền, khóa, xóa'}
+              {activeTab === 'orders' && 'Danh sách tất cả đơn hàng của hệ thống'}
+              {activeTab === 'vnpay' && 'Trạng thái giao dịch thanh toán qua VNPay'}
+              {activeTab === 'moderation' && 'Kiểm duyệt reviews và bài viết cộng đồng'}
+              {activeTab === 'export' && 'Xuất dữ liệu hệ thống ra file CSV'}
             </p>
           </div>
           {activeTab === 'overview' && (
@@ -948,17 +1222,20 @@ export default function AdminDashboard() {
                   <table className="admin-table">
                     <thead>
                       <tr>
-                        <th style={{ width: '10%' }}>ID</th>
-                        <th style={{ width: '30%' }}>Tên tài khoản</th>
-                        <th style={{ width: '30%' }}>Địa chỉ Email</th>
-                        <th style={{ width: '15%' }}>Vai trò</th>
-                        <th style={{ width: '15%' }}>Ngày tham gia</th>
+                        <th style={{ width: '8%' }}>ID</th>
+                        <th style={{ width: '22%' }}>Tên tài khoản</th>
+                        <th style={{ width: '28%' }}>Địa chỉ Email</th>
+                        <th style={{ width: '12%' }}>Vai trò</th>
+                        <th style={{ width: '12%' }}>Trạng thái</th>
+                        <th style={{ width: '12%' }}>Ngày tham gia</th>
+                        <th style={{ width: '16%', textAlign: 'center' }}>Hành động</th>
+
                       </tr>
                     </thead>
                     <tbody>
                       {users.length === 0 ? (
                         <tr>
-                          <td colSpan="5" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '30px' }}>
+                          <td colSpan="7" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '30px' }}>
                             Không tìm thấy người dùng nào phù hợp.
                           </td>
                         </tr>
@@ -983,9 +1260,39 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: userObj.is_banned ? '#ff4655' : '#6dcc3f' }}>
+                                {userObj.is_banned ? '🔒 Bị khóa' : '✓ Hoạt động'}
+                              </span>
+                            </td>
+                            <td>
                               <span style={{ fontSize: '0.85rem', color: 'var(--admin-text-secondary)' }}>
                                 {formatDate(userObj.created_at)}
                               </span>
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', gap: '4px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                                <button
+                                  onClick={() => handleToggleAdmin(userObj.id, userObj.username, userObj.is_admin)}
+                                  title={userObj.is_admin ? 'Thu hồi Admin' : 'Cấp Admin'}
+                                  style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: userObj.is_admin ? 'rgba(248,200,64,0.2)' : 'rgba(92,200,248,0.15)', color: userObj.is_admin ? '#f8c840' : '#5cc8f8', fontWeight: 600 }}
+                                >
+                                  {userObj.is_admin ? '👑 Thu hồi' : '⬆ Admin'}
+                                </button>
+                                <button
+                                  onClick={() => handleToggleBan(userObj.id, userObj.username, userObj.is_banned)}
+                                  title={userObj.is_banned ? 'Mở khóa' : 'Khóa tài khoản'}
+                                  style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: userObj.is_banned ? 'rgba(109,204,63,0.15)' : 'rgba(248,200,64,0.15)', color: userObj.is_banned ? '#6dcc3f' : '#f8c840', fontWeight: 600 }}
+                                >
+                                  {userObj.is_banned ? '🔓 Mở' : '🔒 Khóa'}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteUser(userObj.id, userObj.username)}
+                                  title="Xóa tài khoản"
+                                  style={{ padding: '3px 8px', fontSize: '11px', borderRadius: '5px', border: 'none', cursor: 'pointer', background: 'rgba(255,70,85,0.15)', color: '#ff4655', fontWeight: 600 }}
+                                >
+                                  🗑 Xóa
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -1004,6 +1311,239 @@ export default function AdminDashboard() {
             )}
           </>
         )}
+        {/* ─── TAB: ADD GAME ─── */}
+        {activeTab === 'add-game' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'start' }}>
+            {/* Import từ Steam */}
+            <div className="admin-section-box">
+              <div className="section-box-header">
+                <span className="section-box-title">🎮 Import từ Steam AppID</span>
+              </div>
+              <p style={{ color: 'var(--admin-text-secondary)', fontSize: '13px', marginBottom: '16px' }}>Nhập Steam AppID để tự động lấy thông tin game từ Steam Store.</p>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                <input className="admin-search-input" style={{ flex: 1 }} placeholder="VD: 570 (Dota 2), 730 (CS2)..." value={steamAppId} onChange={e => setSteamAppId(e.target.value)} />
+                <button className="btn-price-save" onClick={handleImportSteam} disabled={addGameLoading} style={{ whiteSpace: 'nowrap' }}>
+                  {addGameLoading ? '⏳ Đang import...' : '⬇️ Import'}
+                </button>
+              </div>
+              {addGameMsg && (
+                <div style={{ padding: '10px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, background: addGameMsg.type === 'success' ? 'rgba(109,204,63,0.15)' : 'rgba(255,70,85,0.15)', color: addGameMsg.type === 'success' ? '#6dcc3f' : '#ff4655', border: `1px solid ${addGameMsg.type === 'success' ? '#6dcc3f44' : '#ff465544'}` }}>
+                  {addGameMsg.text}
+                </div>
+              )}
+            </div>
+
+            {/* Thêm thủ công */}
+            <div className="admin-section-box">
+              <div className="section-box-header">
+                <span className="section-box-title">✏️ Thêm thủ công</span>
+              </div>
+              <form onSubmit={handleAddGame} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <input className="admin-search-input" placeholder="Tên game *" required value={addGameForm.name} onChange={e => setAddGameForm(f => ({ ...f, name: e.target.value }))} />
+                <input className="admin-search-input" placeholder="Mô tả ngắn" value={addGameForm.short_description} onChange={e => setAddGameForm(f => ({ ...f, short_description: e.target.value }))} />
+                <input className="admin-search-input" placeholder="URL ảnh bìa" value={addGameForm.header_image} onChange={e => setAddGameForm(f => ({ ...f, header_image: e.target.value }))} />
+                <input className="admin-search-input" placeholder="Nhà phát hành" value={addGameForm.developers} onChange={e => setAddGameForm(f => ({ ...f, developers: e.target.value }))} />
+                <input className="admin-search-input" placeholder="Ngày phát hành (VD: 2024-01-15)" value={addGameForm.release_date} onChange={e => setAddGameForm(f => ({ ...f, release_date: e.target.value }))} />
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input className="admin-search-input" type="number" placeholder="Giá (VND)" style={{ flex: 1 }} disabled={addGameForm.is_free} value={addGameForm.price_vnd} onChange={e => setAddGameForm(f => ({ ...f, price_vnd: e.target.value }))} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--admin-text-secondary)', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    <input type="checkbox" checked={addGameForm.is_free} onChange={e => setAddGameForm(f => ({ ...f, is_free: e.target.checked }))} /> Miễn phí
+                  </label>
+                </div>
+                <button type="submit" className="btn-price-save" disabled={addGameLoading} style={{ padding: '11px', borderRadius: '8px' }}>
+                  {addGameLoading ? '⏳ Đang thêm...' : '➕ Thêm game'}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ─── TAB: ORDERS ─── */}
+        {activeTab === 'orders' && (
+          <>
+            <div className="admin-control-bar">
+              <div className="admin-control-filters">
+                <div className="search-box-wrapper">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input className="admin-search-input" placeholder="Tìm theo username, email..." value={orderSearch} onChange={e => setOrderSearch(e.target.value)} />
+                </div>
+                <select className="admin-filter-select" value={orderMethodFilter} onChange={e => { setOrderMethodFilter(e.target.value); setOrderPage(1); }}>
+                  <option value="all">Tất cả thanh toán</option>
+                  <option value="VNPay">VNPay</option>
+                  <option value="Thẻ ngân hàng">Thẻ ngân hàng</option>
+                </select>
+                <select className="admin-filter-select" value={orderSort} onChange={e => { setOrderSort(e.target.value); setOrderPage(1); }}>
+                  <option value="newest">Mới nhất</option>
+                  <option value="oldest">Cũ nhất</option>
+                  <option value="amount_desc">Giá trị cao → thấp</option>
+                  <option value="amount_asc">Giá trị thấp → cao</option>
+                </select>
+              </div>
+              <span className="admin-result-count">Tổng <strong>{orderTotal.toLocaleString()}</strong> đơn hàng</span>
+            </div>
+            <div className="table-responsive-wrapper">
+              <table className="admin-table">
+                <thead><tr>
+                  <th>ID</th><th>Khách hàng</th><th>Số game</th><th>Tổng tiền</th><th>Thanh toán</th><th>Ngày đặt</th>
+                </tr></thead>
+                <tbody>
+                  {orders.length === 0 ? (
+                    <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '30px' }}>Chưa có đơn hàng nào.</td></tr>
+                  ) : orders.map(o => (
+                    <tr key={o.id}>
+                      <td style={{ color: 'var(--admin-text-secondary)', fontSize: '0.8rem' }}>#{o.id}</td>
+                      <td>
+                        <strong style={{ color: '#fff' }}>{o.username}</strong>
+                        <div style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>{o.email}</div>
+                      </td>
+                      <td><span style={{ color: '#5cc8f8', fontWeight: 700 }}>{o.item_count} game</span></td>
+                      <td><span className="order-amt">{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(o.total_amount)}</span></td>
+                      <td><span className="badge-user" style={{ background: o.payment_method?.includes('VNPay') ? 'rgba(92,200,248,0.15)' : 'rgba(109,204,63,0.15)', color: o.payment_method?.includes('VNPay') ? '#5cc8f8' : '#6dcc3f' }}>{o.payment_method || 'N/A'}</span></td>
+                      <td style={{ fontSize: '0.83rem', color: 'var(--admin-text-secondary)' }}>{formatDate(o.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination page={orderPage} totalPages={orderTotalPages} total={orderTotal} onPageChange={setOrderPage} loading={tableLoading} />
+          </>
+        )}
+
+        {/* ─── TAB: VNPAY ─── */}
+        {activeTab === 'vnpay' && (
+          <>
+            <div className="table-responsive-wrapper">
+              <table className="admin-table">
+                <thead><tr>
+                  <th>Mã GD (txn_ref)</th><th>Khách hàng</th><th>Số tiền</th><th>Trạng thái</th><th>Thời gian</th>
+                </tr></thead>
+                <tbody>
+                  {vnpayOrders.length === 0 ? (
+                    <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '30px' }}>Chưa có giao dịch VNPay nào.</td></tr>
+                  ) : vnpayOrders.map(v => (
+                    <tr key={v.id}>
+                      <td style={{ fontFamily: 'monospace', color: '#5cc8f8', fontSize: '12px' }}>{v.txn_ref || v.id}</td>
+                      <td>
+                        <strong style={{ color: '#fff' }}>{v.username || 'N/A'}</strong>
+                        <div style={{ fontSize: '12px', color: 'var(--admin-text-secondary)' }}>{v.email}</div>
+                      </td>
+                      <td>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(v.amount)}</td>
+                      <td>
+                        <span className="badge-user" style={{ background: v.status === 'completed' ? 'rgba(109,204,63,0.15)' : v.status === 'pending' ? 'rgba(248,200,64,0.15)' : 'rgba(255,70,85,0.15)', color: v.status === 'completed' ? '#6dcc3f' : v.status === 'pending' ? '#f8c840' : '#ff4655' }}>
+                          {v.status === 'completed' ? '✓ Thành công' : v.status === 'pending' ? '⏳ Chờ xử lý' : '✗ Thất bại'}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: '0.83rem', color: 'var(--admin-text-secondary)' }}>{formatDate(v.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <Pagination page={vnpayPage} totalPages={vnpayTotalPages} total={vnpayTotal} onPageChange={setVnpayPage} loading={tableLoading} />
+          </>
+        )}
+
+        {/* ─── TAB: MODERATION ─── */}
+        {activeTab === 'moderation' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            {/* Reviews */}
+            <div>
+              <div className="admin-control-bar" style={{ marginBottom: '12px' }}>
+                <div className="admin-control-filters">
+                  <div className="search-box-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input className="admin-search-input" placeholder="Tìm reviews..." value={reviewSearch} onChange={e => setReviewSearch(e.target.value)} />
+                  </div>
+                </div>
+                <span className="admin-result-count">⭐ <strong>{reviewTotal}</strong> reviews</span>
+              </div>
+              <div className="table-responsive-wrapper">
+                <table className="admin-table">
+                  <thead><tr><th>Game</th><th>Người dùng</th><th>Nội dung</th><th>Rating</th><th>Ngày</th><th>Hành động</th></tr></thead>
+                  <tbody>
+                    {reviews.length === 0 ? (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '20px' }}>Chưa có review nào.</td></tr>
+                    ) : reviews.map(r => (
+                      <tr key={r.id}>
+                        <td style={{ fontSize: '12px', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.game_name}</td>
+                        <td><strong style={{ color: '#fff' }}>{r.username}</strong></td>
+                        <td style={{ fontSize: '12px', color: 'var(--admin-text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.content}</td>
+                        <td><span style={{ color: '#f8c840', fontWeight: 700 }}>{'★'.repeat(Math.min(r.rating || 0, 5))}</span></td>
+                        <td style={{ fontSize: '11px', color: 'var(--admin-text-secondary)' }}>{formatDate(r.created_at)}</td>
+                        <td><button className="btn-price-cancel" onClick={() => handleDeleteReview(r.id)} style={{ fontSize: '11px', padding: '4px 10px' }}>Xóa</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination page={reviewPage} totalPages={reviewTotalPages} total={reviewTotal} onPageChange={setReviewPage} loading={tableLoading} />
+            </div>
+
+            {/* Posts */}
+            <div>
+              <div className="admin-control-bar" style={{ marginBottom: '12px' }}>
+                <div className="admin-control-filters">
+                  <div className="search-box-wrapper">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input className="admin-search-input" placeholder="Tìm bài viết..." value={postSearch} onChange={e => setPostSearch(e.target.value)} />
+                  </div>
+                </div>
+                <span className="admin-result-count">💬 <strong>{postTotal}</strong> bài viết</span>
+              </div>
+              <div className="table-responsive-wrapper">
+                <table className="admin-table">
+                  <thead><tr><th>Nội dung</th><th>Tác giả</th><th>Likes</th><th>Bình luận</th><th>Ngày</th><th>Hành động</th></tr></thead>
+                  <tbody>
+                    {posts.length === 0 ? (
+                      <tr><td colSpan="6" style={{ textAlign: 'center', color: 'var(--admin-text-secondary)', padding: '20px' }}>Chưa có bài viết nào.</td></tr>
+                    ) : posts.map(p => {
+                      const displayTitle = p.content && p.content.length > 50 ? p.content.slice(0, 48) + '...' : p.content || 'Không có nội dung';
+                      return (
+                        <tr key={p.id}>
+                          <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={p.content}>
+                            <strong>{displayTitle}</strong>
+                          </td>
+                          <td>{p.username}</td>
+                          <td><span style={{ color: '#f472b6' }}>❤ {p.like_count}</span></td>
+                          <td><span style={{ color: '#5cc8f8' }}>💬 {p.comment_count}</span></td>
+                          <td style={{ fontSize: '11px', color: 'var(--admin-text-secondary)' }}>{formatDate(p.created_at)}</td>
+                          <td><button className="btn-price-cancel" onClick={() => handleDeletePost(p.id, displayTitle)} style={{ fontSize: '11px', padding: '4px 10px' }}>Xóa</button></td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination page={postPage} totalPages={postTotalPages} total={postTotal} onPageChange={setPostPage} loading={tableLoading} />
+            </div>
+          </div>
+        )}
+
+        {/* ─── TAB: EXPORT ─── */}
+        {activeTab === 'export' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+            <div className="admin-section-box">
+              <div className="section-box-header">
+                <span className="section-box-title">👥 Xuất danh sách Users</span>
+              </div>
+              <p style={{ color: 'var(--admin-text-secondary)', fontSize: '13px', marginBottom: '20px' }}>Xuất toàn bộ danh sách tài khoản (ID, username, email, quyền, trạng thái, ngày tham gia) ra file CSV.</p>
+              <button className="btn-price-save" onClick={() => handleExport('users')} style={{ padding: '12px 24px', borderRadius: '8px', fontSize: '14px', width: '100%' }}>
+                ⬇️ Tải xuống users.csv
+              </button>
+            </div>
+            <div className="admin-section-box">
+              <div className="section-box-header">
+                <span className="section-box-title">📦 Xuất danh sách Đơn hàng</span>
+              </div>
+              <p style={{ color: 'var(--admin-text-secondary)', fontSize: '13px', marginBottom: '20px' }}>Xuất toàn bộ lịch sử đơn hàng (ID, khách hàng, tổng tiền, phương thức, trạng thái, ngày đặt) ra file CSV.</p>
+              <button className="btn-price-save" onClick={() => handleExport('orders')} style={{ padding: '12px 24px', borderRadius: '8px', fontSize: '14px', width: '100%' }}>
+                ⬇️ Tải xuống orders.csv
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── TAB: USERS (enhanced) - override previous users tab with action buttons ─── */}
       </main>
     </div>
   );

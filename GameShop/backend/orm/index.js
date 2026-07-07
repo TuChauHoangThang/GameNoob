@@ -9,6 +9,7 @@ const User = sequelize.define('User', {
   password: { type: DataTypes.STRING(255), allowNull: false },
   is_admin: { type: DataTypes.BOOLEAN, defaultValue: false },
   is_verified: { type: DataTypes.BOOLEAN, defaultValue: false },
+  is_banned: { type: DataTypes.BOOLEAN, defaultValue: false },
   otp_code: { type: DataTypes.STRING(6), allowNull: true },
   otp_expires_at: { type: DataTypes.DATE, allowNull: true },
 }, {
@@ -17,6 +18,7 @@ const User = sequelize.define('User', {
   createdAt: 'created_at',
   updatedAt: false,
 });
+
 
 // ── Game ──────────────────────────────────────────────────────────────────────
 const Game = sequelize.define('Game', {

@@ -42,7 +42,7 @@ const ACH_ICONS  = ['🏆','⚔️','🛡️','🔥','💎','🗡️','👑','�
 
 /* ─── Install Button Component ─── */
 function InstallButton({ game, onStatusChange }) {
-  const [status, setStatus] = useState(game.install_status || 'not_installed');
+  const status = game.install_status || 'not_installed';
   const [progress, setProgress] = useState(0);
 
   const triggerDownload = useCallback((gameId) => {
@@ -55,38 +55,40 @@ function InstallButton({ game, onStatusChange }) {
     document.body.removeChild(link);
   }, []);
 
+  // Tự động chạy tiến trình tải giả lập khi status chuyển sang installing
+  useEffect(() => {
+    if (status !== 'installing') {
+      setProgress(0);
+      return;
+    }
+
+    let prog = 0;
+    const interval = setInterval(async () => {
+      prog += Math.random() * 15 + 5; // Tăng tốc độ giả lập lên một chút
+      if (prog >= 100) {
+        prog = 100;
+        clearInterval(interval);
+        setProgress(100);
+        await onStatusChange(game.game_id, 'installed');
+      } else {
+        setProgress(Math.round(prog));
+      }
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, [status, game.game_id, onStatusChange]);
+
   const handleInstall = useCallback(async () => {
     if (status === 'installed') {
       // Gỡ cài đặt
-      setStatus('not_installed');
-      setProgress(0);
       await onStatusChange(game.game_id, 'not_installed');
       return;
     }
     if (status === 'installing') return;
 
-    // Bắt đầu cài đặt — tải file thật
-    setStatus('installing');
-    setProgress(0);
+    // Bắt đầu cài đặt
     await onStatusChange(game.game_id, 'installing');
-
-    // Trigger download thật
     triggerDownload(game.game_id);
-
-    // Giả lập tiến trình cài đặt (frontend simulation)
-    let prog = 0;
-    const interval = setInterval(async () => {
-      prog += Math.random() * 12 + 5;
-      if (prog >= 100) {
-        prog = 100;
-        clearInterval(interval);
-        setProgress(100);
-        setStatus('installed');
-        await onStatusChange(game.game_id, 'installed');
-      } else {
-        setProgress(Math.round(prog));
-      }
-    }, 400);
   }, [status, game.game_id, onStatusChange, triggerDownload]);
 
   if (status === 'installing') {
@@ -102,6 +104,7 @@ function InstallButton({ game, onStatusChange }) {
       </div>
     );
   }
+
 
   if (status === 'installed') {
     return (

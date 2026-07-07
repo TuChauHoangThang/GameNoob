@@ -4,33 +4,33 @@
    STEAM-STYLE DESIGN TOKENS
 ======================================== */
 :root {
-  /* Colors - Steam Dark Theme */
-  --steam-dark-bg: #1b2838;
-  --steam-darker-bg: #171a21;
-  --steam-card-bg: #16202d;
-  --steam-panel-bg: #2a475e;
-  --steam-highlight: #c7d5e0;
-  --steam-text: #acb2b8;
-  --steam-text-dim: #7a9bb5;
-  --steam-blue: #66c0f4;
-  --steam-blue-hover: #4fa3d9;
-  --steam-blue-dark: #1a9fff;
-  --steam-blue-btn: #4d8eb2;
-  --steam-green: #4c6b22;
-  --steam-green-bright: #a4d007;
-  --steam-orange: #e87c23;
-  --steam-red: #e2001a;
-  --steam-gold: #f6c745;
-  --steam-border: #2a3f5a;
-  --steam-border-light: #3d5a73;
-  --steam-overlay: rgba(0, 0, 0, 0.5);
+  /* Colors - Deep Ocean Blue Dark Theme */
+  --steam-dark-bg: #254872;
+  --steam-darker-bg: #1e3a5f;
+  --steam-card-bg: #2d5585;
+  --steam-panel-bg: #1a3251;
+  --steam-highlight: #e8f4fd;
+  --steam-text: #c8dff0;
+  --steam-text-dim: #8ab4d4;
+  --steam-blue: #5cc8f8;
+  --steam-blue-hover: #3ab4f0;
+  --steam-blue-dark: #7dd8ff;
+  --steam-blue-btn: #3a9fd4;
+  --steam-green: #1a4a1a;
+  --steam-green-bright: #6dcc3f;
+  --steam-orange: #f0913a;
+  --steam-red: #f04a4a;
+  --steam-gold: #f8c840;
+  --steam-border: #3a6a9a;
+  --steam-border-light: #4a7aaa;
+  --steam-overlay: rgba(10, 20, 40, 0.45);
 
   /* Gradients */
-  --gradient-header: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
-  --gradient-hero: linear-gradient(180deg, transparent 40%, rgba(27, 40, 56, 0.9) 80%, #1b2838 100%);
-  --gradient-card: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.8) 100%);
-  --gradient-blue: linear-gradient(135deg, #4d7ea8, #66c0f4);
-  --gradient-discount: linear-gradient(135deg, #4c6b22, #5c7a28);
+  --gradient-header: linear-gradient(135deg, #1a3251 0%, #254872 100%);
+  --gradient-hero: linear-gradient(180deg, transparent 40%, rgba(30, 58, 95, 0.92) 80%, #1e3a5f 100%);
+  --gradient-card: linear-gradient(180deg, transparent 50%, rgba(20, 45, 80, 0.9) 100%);
+  --gradient-blue: linear-gradient(135deg, #3a9fd4, #5cc8f8);
+  --gradient-discount: linear-gradient(135deg, #2a6b2a, #3a8a1a);
 
   /* Spacing */
   --nav-height: 52px;
@@ -42,9 +42,54 @@
   --transition-slow: 0.4s ease;
 
   /* Shadows */
-  --shadow-card: 0 4px 20px rgba(0,0,0,0.5);
-  --shadow-glow-blue: 0 0 20px rgba(102,192,244,0.3);
-  --shadow-glow-green: 0 0 20px rgba(164,208,7,0.3);
+  --shadow-card: 0 4px 20px rgba(10, 20, 40, 0.5);
+  --shadow-glow-blue: 0 0 20px rgba(92, 200, 248, 0.3);
+  --shadow-glow-green: 0 0 20px rgba(109, 204, 63, 0.3);
+
+  /* Skeleton variables */
+  --skeleton-base: #2d5585;
+  --skeleton-highlight: #3a6a9a;
+}
+
+/* ========================================
+   LIGHT THEME VARIABLES
+======================================== */
+html[data-theme="light"] {
+  /* Soft Sky Light Theme */
+  --steam-darker-bg: #ddeaf5;
+  --steam-dark-bg: #e8f2fa;
+  --steam-card-bg: #f2f8fd;
+  --steam-panel-bg: #ccdded;
+  --steam-highlight: #0d2137;
+  --steam-text: #1e3a52;
+  --steam-text-dim: #4a6e8a;
+  --steam-blue: #0a6ebd;
+  --steam-blue-hover: #085fa3;
+  --steam-blue-dark: #074d88;
+  --steam-blue-btn: #0a6ebd;
+  --steam-green: #c8eab8;
+  --steam-green-bright: #2d6e0a;
+  --steam-orange: #c05c00;
+  --steam-red: #c0001a;
+  --steam-gold: #9a6c00;
+  --steam-border: #a8c8e0;
+  --steam-border-light: #c0d8ec;
+  --steam-overlay: rgba(13, 33, 55, 0.25);
+
+  /* Gradients */
+  --gradient-header: linear-gradient(135deg, #ccdded 0%, #ddeaf5 100%);
+  --gradient-hero: linear-gradient(180deg, transparent 40%, rgba(221, 234, 245, 0.95) 80%, #ddeaf5 100%);
+  --gradient-card: linear-gradient(180deg, transparent 50%, rgba(221, 234, 245, 0.92) 100%);
+  --gradient-blue: linear-gradient(135deg, #0a6ebd, #3a9fd4);
+  --gradient-discount: linear-gradient(135deg, #2d6e0a, #3d8c10);
+
+  /* Skeleton */
+  --skeleton-base: #c8dcea;
+  --skeleton-highlight: #d8eaf5;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(13, 33, 55, 0.12);
+  --shadow-glow-blue: 0 0 20px rgba(10, 110, 189, 0.2);
 }
 
 /* ========================================
@@ -284,7 +329,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #1e2d3d 25%, #243545 50%, #1e2d3d 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;

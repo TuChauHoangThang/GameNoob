@@ -12,12 +12,14 @@ const CATEGORIES = ['Action', 'RPG', 'Strategy', 'Sports', 'Indie', 'Simulation'
 
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar({ onCart }) {
   const [searchVal, setSearchVal] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -64,7 +66,7 @@ export default function Navbar({ onCart }) {
             {user ? (
               <div className="user-info" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <img src={user.avatar || 'https://api.dicebear.com/7.x/pixel-art/svg?seed=gamer'} alt="avatar" className="user-avatar" style={{ width: '32px', height: '32px', borderRadius: '50%' }} />
-                <Link to="/profile" className="user-name" style={{ color: '#fff', fontWeight: 'bold', textDecoration: 'none' }}>{user.username}</Link>
+                <Link to="/profile" className="user-name" style={{ color: 'var(--steam-highlight)', fontWeight: 'bold', textDecoration: 'none' }}>{user.username}</Link>
                 <span className="topbar-sep">|</span>
                 {user.is_admin && (
                   <>
@@ -72,11 +74,11 @@ export default function Navbar({ onCart }) {
                     <span className="topbar-sep">|</span>
                   </>
                 )}
-                <Link to="/profile" className="topbar-link" style={{ textDecoration: 'none', color: '#c6d4df' }}>Hồ sơ</Link>
+                <Link to="/profile" className="topbar-link" style={{ textDecoration: 'none', color: 'var(--steam-text)' }}>Hồ sơ</Link>
                 <span className="topbar-sep">|</span>
-                <Link to="/wishlist" className="topbar-link" style={{ textDecoration: 'none', color: '#c6d4df' }}>Danh sách ước</Link>
+                <Link to="/wishlist" className="topbar-link" style={{ textDecoration: 'none', color: 'var(--steam-text)' }}>Danh sách ước</Link>
                 <span className="topbar-sep">|</span>
-                <button onClick={handleLogout} className="topbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#aaa' }}>Đăng xuất</button>
+                <button onClick={handleLogout} className="topbar-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--steam-text-dim)' }}>Đăng xuất</button>
               </div>
             ) : (
               <div className="auth-actions">
@@ -85,6 +87,25 @@ export default function Navbar({ onCart }) {
                 <Link to="/register" className="topbar-link">Đăng ký</Link>
               </div>
             )}
+            <button className="theme-toggle-btn" onClick={toggleTheme} title={theme === 'dark' ? 'Chuyển sang Chế độ sáng' : 'Chuyển sang Chế độ tối'}>
+              {theme === 'dark' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="5"></circle>
+                  <line x1="12" y1="1" x2="12" y2="3"></line>
+                  <line x1="12" y1="21" x2="12" y2="23"></line>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                  <line x1="1" y1="12" x2="3" y2="12"></line>
+                  <line x1="21" y1="12" x2="23" y2="12"></line>
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              )}
+            </button>
             <Link to="/cart" className="cart-btn" title="Giỏ hàng">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59L5.25 14c-.16.28-.25.61-.25.96C5 16.1 5.9 17 7 17h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.46 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>

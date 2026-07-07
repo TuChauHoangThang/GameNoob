@@ -13,6 +13,10 @@
   border-bottom: 1px solid var(--steam-border);
 }
 
+.footer-grid--slim {
+  grid-template-columns: 2fr 1fr 1fr;
+}
+
 .footer-brand-col {
   display: flex;
   flex-direction: column;

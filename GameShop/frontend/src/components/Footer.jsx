@@ -1,17 +1,26 @@
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const FOOTER_LINKS = {
-  'Về GameNoob': ['Giới thiệu', 'Tuyển dụng', 'Báo chí', 'Liên hệ'],
-  'Hỗ trợ': ['Trung tâm hỗ trợ', 'Chính sách hoàn tiền', 'Báo cáo lỗi', 'Diễn đàn'],
-  'Dịch vụ': ['Tặng quà', 'Thẻ quà tặng', 'Mobile App', 'API cho devs'],
-  'Pháp lý': ['Điều khoản dịch vụ', 'Chính sách bảo mật', 'Cookie', 'GDPR'],
+  'Về GameNoob': [
+    { label: 'Giới thiệu', to: '/about' },
+    { label: 'Tuyển dụng', to: '/careers' },
+    { label: 'Báo chí', to: '/press' },
+    { label: 'Liên hệ', to: '/contact' },
+  ],
+  'Hỗ trợ': [
+    { label: 'Trung tâm hỗ trợ', to: '/support' },
+    { label: 'Chính sách hoàn tiền', to: '/refund-policy' },
+    { label: 'Báo cáo lỗi', to: '/report-bug' },
+    { label: 'Diễn đàn', to: '/community' },
+  ],
 };
 
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="container">
-        <div className="footer-grid">
+        <div className="footer-grid footer-grid--slim">
           <div className="footer-brand-col">
             <div className="footer-logo">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--steam-blue)">
@@ -33,7 +42,9 @@ export default function Footer() {
               <h4 className="footer-col-title">{section}</h4>
               <ul className="footer-links">
                 {links.map(l => (
-                  <li key={l}><a href="#" className="footer-link">{l}</a></li>
+                  <li key={l.label}>
+                    <Link to={l.to} className="footer-link">{l.label}</Link>
+                  </li>
                 ))}
               </ul>
             </div>

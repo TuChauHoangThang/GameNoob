@@ -3,7 +3,7 @@ const vnpayTxnModel = require('../models/vnpayTransactionModel');
 const cartModel = require('../models/cartModel');
 const orderModel = require('../models/orderModel');
 const libraryModel = require('../models/libraryModel');
-const pool = require('../configs/db');
+const { sequelize } = require('../orm');
 
 /**
  * BƯỚC 1 — Tạo URL thanh toán VNPay
@@ -178,32 +178,28 @@ exports.getVNPayStatus = async (req, res) => {
 
 // ── Fulfill order: tạo order, thêm vào library, xóa cart ─────────────────────
 async function fulfillOrder(pending, bankCode, vnpTransactionNo) {
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
-
+  const order = await sequelize.transaction(async (transaction) => {
     const cartItems = pending.cart_snapshot;
-    const userId    = pending.user_id;
+    const userId = pending.user_id;
 
-    const order = await orderModel.createOrder(userId, pending.amount, `VNPay (${bankCode || 'N/A'})`, null);
+    const created = await orderModel.createOrder(
+      userId,
+      pending.amount,
+      `VNPay (${bankCode || 'N/A'})`,
+      null,
+      transaction
+    );
 
     for (const item of cartItems) {
       const price = item.is_free ? 0 : (parseInt(item.price_vnd) || 0);
-      await orderModel.addOrderItem(order.id, item.game_id, price);
-      await libraryModel.addToLibrary(userId, item.game_id, order.id);
+      await orderModel.addOrderItem(created.id, item.game_id, price, transaction);
+      await libraryModel.addToLibrary(userId, item.game_id, created.id, transaction);
     }
 
-    await cartModel.clearCart(userId);
-    await client.query('COMMIT');
+    await cartModel.clearCart(userId, transaction);
+    return created;
+  });
 
-    // Cập nhật trạng thái pending record
-    await vnpayTxnModel.updateStatus(pending.txn_ref, 'completed', vnpTransactionNo, bankCode);
-
-    return order;
-  } catch (err) {
-    await client.query('ROLLBACK');
-    throw err;
-  } finally {
-    client.release();
-  }
+  await vnpayTxnModel.updateStatus(pending.txn_ref, 'completed', vnpTransactionNo, bankCode);
+  return order;
 }

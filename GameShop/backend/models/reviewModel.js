@@ -1,74 +1,69 @@
-const pool = require('../configs/db');
+const { Review, User } = require('../orm');
+const { sequelize } = require('../orm');
 
-// Lấy tất cả review của một game
-const getReviewsByGameId = async (gameId) => {
-  const result = await pool.query(
-    `SELECT r.id, r.rating, r.content, r.created_at,
-            u.username, u.id as user_id
-     FROM reviews r
-     JOIN users u ON r.user_id = u.id
-     WHERE r.game_id = $1
-     ORDER BY r.created_at DESC`,
-    [gameId]
-  );
-  return result.rows;
+const initReviewsTable = async () => {
+  await Review.sync({ alter: false });
 };
 
-// Lấy thống kê rating của game (avg, count)
+const getReviewsByGameId = async (gameId) => {
+  const reviews = await Review.findAll({
+    where: { game_id: gameId },
+    include: [{ model: User, attributes: ['id', 'username'] }],
+    order: [['created_at', 'DESC']],
+  });
+  return reviews.map((r) => {
+    const plain = r.get({ plain: true });
+    return {
+      id: plain.id,
+      rating: plain.rating,
+      content: plain.content,
+      created_at: plain.created_at,
+      username: plain.User.username,
+      user_id: plain.User.id,
+    };
+  });
+};
+
 const getRatingStats = async (gameId) => {
-  const result = await pool.query(
+  const [stats] = await sequelize.query(
     `SELECT
        COUNT(*) as total_reviews,
        ROUND(AVG(rating)::numeric, 1) as avg_rating,
        COUNT(CASE WHEN rating >= 4 THEN 1 END) as positive,
        COUNT(CASE WHEN rating <= 2 THEN 1 END) as negative
-     FROM reviews WHERE game_id = $1`,
-    [gameId]
+     FROM reviews WHERE game_id = :gameId`,
+    { replacements: { gameId }, type: sequelize.QueryTypes.SELECT }
   );
-  return result.rows[0];
+  return stats;
 };
 
-// Kiểm tra user đã review game này chưa
 const getUserReview = async (userId, gameId) => {
-  const result = await pool.query(
-    'SELECT * FROM reviews WHERE user_id = $1 AND game_id = $2',
-    [userId, gameId]
-  );
-  return result.rows[0];
+  const review = await Review.findOne({ where: { user_id: userId, game_id: gameId } });
+  return review ? review.get({ plain: true }) : null;
 };
 
-// Tạo review mới
 const createReview = async (userId, gameId, rating, content) => {
-  const result = await pool.query(
-    `INSERT INTO reviews (user_id, game_id, rating, content)
-     VALUES ($1, $2, $3, $4)
-     RETURNING *`,
-    [userId, gameId, rating, content]
-  );
-  return result.rows[0];
+  const review = await Review.create({ user_id: userId, game_id: gameId, rating, content });
+  return review.get({ plain: true });
 };
 
-// Cập nhật review
 const updateReview = async (reviewId, userId, rating, content) => {
-  const result = await pool.query(
-    `UPDATE reviews SET rating = $1, content = $2, updated_at = NOW()
-     WHERE id = $3 AND user_id = $4
-     RETURNING *`,
-    [rating, content, reviewId, userId]
-  );
-  return result.rows[0];
+  const review = await Review.findOne({ where: { id: reviewId, user_id: userId } });
+  if (!review) return null;
+  await review.update({ rating, content });
+  return review.get({ plain: true });
 };
 
-// Xóa review
 const deleteReview = async (reviewId, userId) => {
-  const result = await pool.query(
-    'DELETE FROM reviews WHERE id = $1 AND user_id = $2 RETURNING *',
-    [reviewId, userId]
-  );
-  return result.rows[0];
+  const review = await Review.findOne({ where: { id: reviewId, user_id: userId } });
+  if (!review) return null;
+  const plain = review.get({ plain: true });
+  await review.destroy();
+  return plain;
 };
 
 module.exports = {
+  initReviewsTable,
   getReviewsByGameId,
   getRatingStats,
   getUserReview,

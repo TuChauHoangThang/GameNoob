@@ -274,7 +274,7 @@
 }
 
 /* Stats */
-.store-sidebar .stats-grid {
+.store-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -300,7 +300,37 @@
   text-overflow: ellipsis;
 }
 
-.store-sidebar .stat-label {
+.trending-price {
+  font-size: 11px;
+  color: var(--steam-green-bright);
+  font-weight: 600;
+}
+
+/* Stats */
+.store-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 4px;
+  border: 1px solid var(--steam-border);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--steam-blue);
+}
+
+.stat-label {
   font-size: 11px;
   color: var(--steam-text-dim);
 }

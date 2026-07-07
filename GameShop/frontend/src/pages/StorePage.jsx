@@ -264,7 +264,7 @@ export default function StorePage() {
 
           <div className="sidebar-card">
             <h3 className="sidebar-title">📊 Thống Kê</h3>
-            <div className="stats-grid">
+            <div className="store-stats-grid">
               {[
                 { label: 'Tựa game', value: games.length + (hasMore ? '+' : '') },
                 { label: 'Người dùng', value: '250K+' },

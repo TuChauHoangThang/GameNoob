@@ -32,8 +32,6 @@ const formatCardNumber = (value) =>
 const PAYMENT_METHODS = [
   { id: 'card',    label: 'Thẻ ngân hàng', desc: 'Visa, Mastercard, Napas', icon: '💳' },
   { id: 'vnpay',   label: 'VNPay',         desc: 'Cổng thanh toán VNPay',   color: '#005baa' },
-  { id: 'momo',    label: 'MoMo',          desc: 'Ví điện tử MoMo',         color: '#a50064' },
-  { id: 'zalopay', label: 'ZaloPay',       desc: 'Ví điện tử ZaloPay',      color: '#0068ff' },
 ];
 
 // ── EWallet confirm step ──────────────────────────────────────────────────

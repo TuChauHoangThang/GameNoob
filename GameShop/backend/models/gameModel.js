@@ -1,85 +1,60 @@
-const pool = require('../configs/db');
+const { Op } = require('sequelize');
+const { Game, sequelize } = require('../orm');
 
-// Lấy tất cả game
 const getAllGames = async (limit = 20, offset = 0) => {
-  const result = await pool.query(
-    'SELECT * FROM games ORDER BY id DESC LIMIT $1 OFFSET $2',
-    [limit, offset]
-  );
-  return result.rows;
+  const games = await Game.findAll({
+    order: [['id', 'DESC']],
+    limit,
+    offset,
+  });
+  return games.map((g) => g.get({ plain: true }));
 };
 
-// Lấy game theo thể loại
 const getGamesByGenre = async (genre, limit = 20, offset = 0) => {
-  const result = await pool.query(
-    `SELECT * FROM games WHERE genres::text ILIKE $1 OR categories::text ILIKE $1 ORDER BY id DESC LIMIT $2 OFFSET $3`,
-    [`%${genre}%`, limit, offset]
-  );
-  return result.rows;
+  const pattern = `%${genre}%`;
+  const games = await Game.findAll({
+    where: {
+      [Op.or]: [
+        sequelize.where(sequelize.cast(sequelize.col('genres'), 'TEXT'), { [Op.iLike]: pattern }),
+        sequelize.where(sequelize.cast(sequelize.col('categories'), 'TEXT'), { [Op.iLike]: pattern }),
+      ],
+    },
+    order: [['id', 'DESC']],
+    limit,
+    offset,
+  });
+  return games.map((g) => g.get({ plain: true }));
 };
 
-// Tìm kiếm game theo tên
 const searchGames = async (query, limit = 20, offset = 0) => {
-  const result = await pool.query(
-    'SELECT * FROM games WHERE name ILIKE $1 ORDER BY id DESC LIMIT $2 OFFSET $3',
-    [`%${query}%`, limit, offset]
-  );
-  return result.rows;
+  const games = await Game.findAll({
+    where: { name: { [Op.iLike]: `%${query}%` } },
+    order: [['id', 'DESC']],
+    limit,
+    offset,
+  });
+  return games.map((g) => g.get({ plain: true }));
 };
 
-// Lấy chi tiết game theo ID
 const getGameById = async (id) => {
-  const result = await pool.query('SELECT * FROM games WHERE id = $1', [id]);
-  return result.rows[0];
+  const game = await Game.findByPk(id);
+  return game ? game.get({ plain: true }) : null;
 };
 
-// Lấy chi tiết game theo Steam AppID
 const getGameBySteamAppId = async (steamAppId) => {
-  const result = await pool.query('SELECT * FROM games WHERE steam_appid = $1', [steamAppId]);
-  return result.rows[0];
+  const game = await Game.findOne({ where: { steam_appid: steamAppId } });
+  return game ? game.get({ plain: true }) : null;
 };
 
-// Thêm hoặc cập nhật game (Upsert)
 const upsertGame = async (gameData) => {
   const {
     steam_appid, name, short_description, detailed_description,
     header_image, capsule_image, website, developers, publishers,
     price_overview, platforms, categories, genres, screenshots,
-    movies, release_date, background, rating, owners
+    movies, release_date, background, rating, owners,
   } = gameData;
 
-  const query = `
-    INSERT INTO games (
-      steam_appid, name, short_description, detailed_description,
-      header_image, capsule_image, website, developers, publishers,
-      price_overview, platforms, categories, genres, screenshots,
-      movies, release_date, background, rating, owners
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
-    )
-    ON CONFLICT (steam_appid) DO UPDATE SET
-      name = EXCLUDED.name,
-      short_description = EXCLUDED.short_description,
-      detailed_description = EXCLUDED.detailed_description,
-      header_image = EXCLUDED.header_image,
-      capsule_image = EXCLUDED.capsule_image,
-      website = EXCLUDED.website,
-      developers = EXCLUDED.developers,
-      publishers = EXCLUDED.publishers,
-      price_overview = EXCLUDED.price_overview,
-      platforms = EXCLUDED.platforms,
-      categories = EXCLUDED.categories,
-      genres = EXCLUDED.genres,
-      screenshots = EXCLUDED.screenshots,
-      movies = EXCLUDED.movies,
-      release_date = EXCLUDED.release_date,
-      background = EXCLUDED.background,
-      rating = EXCLUDED.rating,
-      owners = EXCLUDED.owners
-    RETURNING *;
-  `;
-
-  const values = [
+  const [game] = await Game.upsert({
     steam_appid,
     name,
     short_description,
@@ -89,29 +64,29 @@ const upsertGame = async (gameData) => {
     website,
     developers,
     publishers,
-    JSON.stringify(price_overview),
-    JSON.stringify(platforms),
-    JSON.stringify(categories),
-    JSON.stringify(genres),
-    JSON.stringify(screenshots),
-    JSON.stringify(movies),
-    JSON.stringify(release_date),
+    price_overview,
+    platforms,
+    categories,
+    genres,
+    screenshots,
+    movies,
+    release_date,
     background,
     rating,
-    owners
-  ];
+    owners,
+  }, { conflictFields: ['steam_appid'] });
 
-  const result = await pool.query(query, values);
-  return result.rows[0];
+  return game.get({ plain: true });
 };
 
-// Lấy game miễn phí
 const getFreeGames = async (limit = 20, offset = 0) => {
-  const result = await pool.query(
-    'SELECT * FROM games WHERE is_free = true ORDER BY id DESC LIMIT $1 OFFSET $2',
-    [limit, offset]
-  );
-  return result.rows;
+  const games = await Game.findAll({
+    where: { is_free: true },
+    order: [['id', 'DESC']],
+    limit,
+    offset,
+  });
+  return games.map((g) => g.get({ plain: true }));
 };
 
 module.exports = {

@@ -5,7 +5,8 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    // Gmail App Password cho phép có spaces — strip để chắc chắn
+    pass: (process.env.EMAIL_PASSWORD || '').replace(/\s/g, ''),
   },
 });
 
@@ -88,7 +89,12 @@ const sendOtpEmail = async (email, otp, purpose = 'register') => {
     html: getOtpEmailTemplate(otp, purpose),
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error('❌ Lỗi gửi email OTP:', err.message);
+    throw err;
+  }
 };
 
 module.exports = { generateOTP, sendOtpEmail };

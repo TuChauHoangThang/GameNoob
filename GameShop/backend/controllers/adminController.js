@@ -15,11 +15,14 @@ const requireAdmin = async (req, res, next) => {
 
 const getDashboardStats = async (req, res) => {
   try {
-    const [users, games, orders, revenue, topGames, recentRevenue, recentOrders] = await Promise.all([
+    const [users, games, orders, revenue, topGames, recentRevenue, recentOrders,
+      topGamesFull, userGrowth, paymentStats, topSpenders] = await Promise.all([
       User.count(),
       Game.count(),
       Order.count(),
       Order.sum('total_amount'),
+
+      // Top 5 game bán chạy (cho bảng)
       sequelize.query(
         `SELECT g.id, g.name, g.header_image, g.price_vnd, g.is_free,
                 COUNT(oi.id) as sold_count,
@@ -31,6 +34,8 @@ const getDashboardStats = async (req, res) => {
          LIMIT 5`,
         { type: sequelize.QueryTypes.SELECT }
       ),
+
+      // Doanh thu 7 ngày gần nhất
       sequelize.query(
         `SELECT DATE(created_at) as date, COUNT(*) as orders, SUM(total_amount) as revenue
          FROM orders
@@ -39,6 +44,8 @@ const getDashboardStats = async (req, res) => {
          ORDER BY date ASC`,
         { type: sequelize.QueryTypes.SELECT }
       ),
+
+      // 10 đơn hàng gần nhất
       sequelize.query(
         `SELECT o.id, o.total_amount, o.created_at, o.payment_method, o.card_last_four,
                 u.username, u.email, COUNT(oi.id) as item_count
@@ -47,6 +54,66 @@ const getDashboardStats = async (req, res) => {
          JOIN order_items oi ON oi.order_id = o.id
          GROUP BY o.id, o.total_amount, o.created_at, o.payment_method, o.card_last_four, u.username, u.email
          ORDER BY o.created_at DESC
+         LIMIT 10`,
+        { type: sequelize.QueryTypes.SELECT }
+      ),
+
+      // Top 10 game bán chạy cho biểu đồ cột
+      sequelize.query(
+        `SELECT g.name, COUNT(oi.id) as sold_count,
+                SUM(COALESCE(oi.price_at_purchase, 0)) as revenue
+         FROM games g
+         JOIN order_items oi ON oi.game_id = g.id
+         GROUP BY g.id, g.name
+         ORDER BY sold_count DESC
+         LIMIT 10`,
+        { type: sequelize.QueryTypes.SELECT }
+      ),
+
+      // Người dùng đăng ký theo tháng (6 tháng gần nhất)
+      sequelize.query(
+        `SELECT TO_CHAR(created_at, 'MM/YYYY') as month,
+                COUNT(*) as count
+         FROM users
+         WHERE created_at >= NOW() - INTERVAL '6 months'
+         GROUP BY TO_CHAR(created_at, 'MM/YYYY'), DATE_TRUNC('month', created_at)
+         ORDER BY DATE_TRUNC('month', created_at) ASC`,
+        { type: sequelize.QueryTypes.SELECT }
+      ),
+
+      // Thống kê phương thức thanh toán
+      sequelize.query(
+        `SELECT 
+           CASE 
+             WHEN payment_method IN ('Visa', 'Mastercard', 'Napas', 'Thẻ ngân hàng') THEN 'Thẻ ngân hàng'
+             WHEN payment_method LIKE 'VNPay%' OR payment_method = 'VNPay' THEN 'VNPay'
+           END as payment_method,
+           COUNT(*) as count,
+           SUM(total_amount) as total
+         FROM orders
+         WHERE payment_method IN ('Visa', 'Mastercard', 'Napas', 'Thẻ ngân hàng') 
+            OR payment_method LIKE 'VNPay%' 
+            OR payment_method = 'VNPay'
+         GROUP BY 
+           CASE 
+             WHEN payment_method IN ('Visa', 'Mastercard', 'Napas', 'Thẻ ngân hàng') THEN 'Thẻ ngân hàng'
+             WHEN payment_method LIKE 'VNPay%' OR payment_method = 'VNPay' THEN 'VNPay'
+           END
+         ORDER BY count DESC`,
+        { type: sequelize.QueryTypes.SELECT }
+      ),
+
+      // Top 10 người dùng chi tiêu nhiều nhất
+      sequelize.query(
+        `SELECT u.id, u.username, u.email, u.created_at,
+                COUNT(DISTINCT o.id)  AS order_count,
+                COUNT(oi.id)          AS game_count,
+                SUM(o.total_amount)   AS total_spent
+         FROM users u
+         JOIN orders o  ON o.user_id  = u.id
+         JOIN order_items oi ON oi.order_id = o.id
+         GROUP BY u.id, u.username, u.email, u.created_at
+         ORDER BY total_spent DESC
          LIMIT 10`,
         { type: sequelize.QueryTypes.SELECT }
       ),
@@ -63,6 +130,10 @@ const getDashboardStats = async (req, res) => {
       topGames,
       recentRevenue,
       recentOrders,
+      topGamesFull,
+      userGrowth,
+      paymentStats,
+      topSpenders,
     });
   } catch (error) {
     console.error('Lỗi dashboard stats:', error);
@@ -70,28 +141,56 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+const parsePage = (raw, fallback = 1) => Math.max(parseInt(raw, 10) || fallback, 1);
+const parseLimit = (raw, fallback = 20, max = 50) =>
+  Math.min(Math.max(parseInt(raw, 10) || fallback, 1), max);
+
+const buildPagination = (total, limit, page) => ({
+  total,
+  limit,
+  page,
+  totalPages: Math.max(Math.ceil(total / limit), 1),
+});
+
 const getAllUsers = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 20;
-    const offset = parseInt(req.query.offset) || 0;
-    const search = req.query.q;
+    const limit = parseLimit(req.query.limit);
+    const page = parsePage(req.query.page);
+    const offset = (page - 1) * limit;
+    const search = req.query.q?.trim();
+    const role = req.query.role || 'all';
+    const sort = req.query.sort || 'newest';
 
-    const users = await User.findAll({
-      where: search
-        ? {
-            [Op.or]: [
-              { username: { [Op.iLike]: `%${search}%` } },
-              { email: { [Op.iLike]: `%${search}%` } },
-            ],
-          }
-        : undefined,
+    const where = {};
+    if (search) {
+      where[Op.or] = [
+        { username: { [Op.iLike]: `%${search}%` } },
+        { email: { [Op.iLike]: `%${search}%` } },
+      ];
+    }
+    if (role === 'admin') where.is_admin = true;
+    if (role === 'user') where.is_admin = false;
+
+    const orderMap = {
+      newest: [['created_at', 'DESC']],
+      oldest: [['created_at', 'ASC']],
+      name_asc: [['username', 'ASC']],
+      name_desc: [['username', 'DESC']],
+    };
+
+    const { rows, count } = await User.findAndCountAll({
+      where: Object.keys(where).length ? where : undefined,
       attributes: ['id', 'username', 'email', 'is_admin', 'created_at'],
-      order: [['created_at', 'DESC']],
+      order: orderMap[sort] || orderMap.newest,
       limit,
       offset,
     });
 
-    res.json({ success: true, data: users.map((u) => u.get({ plain: true })), count: users.length });
+    res.json({
+      success: true,
+      data: rows.map((u) => u.get({ plain: true })),
+      pagination: buildPagination(count, limit, page),
+    });
   } catch (error) {
     console.error('Lỗi lấy users:', error);
     res.status(500).json({ success: false, message: 'Lỗi server.' });
@@ -100,19 +199,40 @@ const getAllUsers = async (req, res) => {
 
 const getAllGamesAdmin = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 30;
-    const offset = parseInt(req.query.offset) || 0;
-    const search = req.query.q;
+    const limit = parseLimit(req.query.limit);
+    const page = parsePage(req.query.page);
+    const offset = (page - 1) * limit;
+    const search = req.query.q?.trim();
+    const price = req.query.price || 'all';
+    const sort = req.query.sort || 'newest';
 
-    const games = await Game.findAll({
-      where: search ? { name: { [Op.iLike]: `%${search}%` } } : undefined,
+    const where = {};
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
+    if (price === 'free') where.is_free = true;
+    if (price === 'paid') where.is_free = false;
+
+    const orderMap = {
+      newest: [['id', 'DESC']],
+      oldest: [['id', 'ASC']],
+      name_asc: [['name', 'ASC']],
+      name_desc: [['name', 'DESC']],
+      price_asc: [['price_vnd', 'ASC']],
+      price_desc: [['price_vnd', 'DESC']],
+    };
+
+    const { rows, count } = await Game.findAndCountAll({
+      where: Object.keys(where).length ? where : undefined,
       attributes: ['id', 'name', 'header_image', 'price_vnd', 'is_free', 'steam_appid'],
-      order: [['id', 'DESC']],
+      order: orderMap[sort] || orderMap.newest,
       limit,
       offset,
     });
 
-    res.json({ success: true, data: games.map((g) => g.get({ plain: true })), count: games.length });
+    res.json({
+      success: true,
+      data: rows.map((g) => g.get({ plain: true })),
+      pagination: buildPagination(count, limit, page),
+    });
   } catch (error) {
     console.error('Lỗi lấy games (admin):', error);
     res.status(500).json({ success: false, message: 'Lỗi server.' });

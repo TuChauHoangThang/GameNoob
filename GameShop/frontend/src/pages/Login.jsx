@@ -44,7 +44,12 @@ const Login = () => {
     try {
       const data = await loginApi(email, password);
       login(data.user, data.token);
-      navigate(from, { replace: true });
+      // Admin luôn vào trang quản trị, không vào cửa hàng
+      if (data.user?.is_admin) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate(from === '/admin' ? '/' : from, { replace: true });
+      }
     } catch (err) {
       if (err.needVerification) {
         setNeedVerification(true);

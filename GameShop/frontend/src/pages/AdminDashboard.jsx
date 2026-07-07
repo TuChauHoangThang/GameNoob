@@ -526,14 +526,14 @@ export default function AdminDashboard() {
   }, [activeTab, postPage, postSearchDebounced]);
 
 
-  // Handle delete game
   const handleDeleteGame = async (gameId, gameName) => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa game "${gameName}" khỏi hệ thống?`)) {
       try {
         const res = await axios.delete(`${API_URL}/admin/games/${gameId}`, getAxiosConfig());
         if (res.data.success) { alert(res.data.message); fetchGames(); }
       } catch (err) { alert(err.response?.data?.message || 'Xóa game thất bại.'); }
-
+    }
+  };
 
   const startEditPrice = (game) => { setEditingGameId(game.id); setEditPrice(game.price_vnd); setEditIsFree(game.is_free); };
 
@@ -605,19 +605,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // Save updated game price
-  const handleSavePrice = async (gameId) => {
-    try {
-      const res = await axios.patch(`${API_URL}/admin/games/${gameId}/price`, { price_vnd: editIsFree ? 0 : Number(editPrice), is_free: editIsFree }, getAxiosConfig());
-      if (res.data.success) {
-        alert(res.data.message);
-        setEditingGameId(null);
-        fetchGames();
 
-      }
-    } catch (err) { setAddGameMsg({ type: 'error', text: err.response?.data?.message || 'Thêm game thất bại.' }); }
-    finally { setAddGameLoading(false); }
-  };
 
   const handleImportSteam = async () => {
     if (!steamAppId) return;
